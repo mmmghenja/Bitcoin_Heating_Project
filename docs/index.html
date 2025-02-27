@@ -7,65 +7,115 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .card {
-            margin-bottom: 20px;
+    .card {
+        margin-bottom: 20px;
+    }
+    .section-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-weight: 600;
+    }
+    .table-sm td, .table-sm th {
+        padding: 0.25rem;
+    }
+    .halving-year {
+        background-color: rgba(255, 215, 0, 0.2) !important;
+    }
+    .preview {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-top: 20px;
+        background-color: #f9f9fa;
+        overflow-x: auto;
+    }
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        background-color: white;
+        z-index: 1000;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .custom-tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+    .custom-tooltip .tooltip-text {
+        visibility: hidden;
+        width: 300px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -150px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .custom-tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+    .input-group-text {
+        min-width: 40px;
+    }
+
+    /* Добавленные стили для мобильных устройств */
+    .table-responsive {
+        overflow-x: auto;
+        position: relative;
+    }
+
+    /* Делаем поля ввода больше на мобильных */
+    @media (max-width: 768px) {
+        .form-control, .btn {
+            font-size: 16px;
+            padding: 10px 12px;
+            height: auto;
         }
-        .section-header {
-            background-color: #f8f9fa;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            font-weight: 600;
-        }
-        .table-sm td, .table-sm th {
-            padding: 0.25rem;
-        }
-        .halving-year {
-            background-color: rgba(255, 215, 0, 0.2) !important;
-        }
-        .preview {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-top: 20px;
-            background-color: #f9f9fa;
-            overflow-x: auto;
-        }
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            background-color: white;
-            z-index: 1000;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .custom-tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
+        .form-control-sm {
+            padding: 6px 8px;
+            font-size: 14px;
         }
         .custom-tooltip .tooltip-text {
-            visibility: hidden;
-            width: 300px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -150px;
-            opacity: 0;
-            transition: opacity 0.3s;
+            width: 200px;
+            margin-left: -100px;
         }
-        .custom-tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
+        .sticky-year-column {
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 2;
+            border-right: 2px solid #dee2e6;
         }
-        .input-group-text {
-            min-width: 40px;
+        .table-wrapper {
+            overflow-x: auto;
+            position: relative;
         }
-    </style>
+        .year-toggle-btn {
+            display: block;
+            margin: 10px 0;
+        }
+        /* Адаптируем метки полей */
+        .col-form-label {
+            font-size: 14px;
+        }
+        /* Уменьшаем padding на карточках */
+        .card-body {
+            padding: 0.75rem;
+        }
+        /* Улучшаем отступы в формах */
+        .row.mb-3 {
+            margin-bottom: 0.5rem !important;
+        }
+    }
+</style>
 </head>
 <body>
     <div class="container-fluid">
@@ -237,23 +287,35 @@
                                     <h5>Прогнозные показатели на 7 лет</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive">
+                                    <div class="d-md-none mb-2">
+                                        <select class="form-select year-selector">
+                                            <option value="all">Все годы</option>
+                                            <option value="1">Только год 1</option>
+                                            <option value="2">Только год 2</option>
+                                            <option value="3">Только год 3</option>
+                                            <option value="4">Только год 4 (халвинг)</option>
+                                            <option value="5">Только год 5</option>
+                                            <option value="6">Только год 6</option>
+                                            <option value="7">Только год 7</option>
+                                        </select>
+                                    </div>
+                                    <div class="table-wrapper">
                                         <table class="table table-sm table-hover" id="yearlyParamsTable">
                                             <thead>
                                                 <tr>
-                                                    <th>Параметр</th>
-                                                    <th>Год 1</th>
-                                                    <th>Год 2</th>
-                                                    <th>Год 3</th>
-                                                    <th>Год 4</th>
-                                                    <th>Год 5</th>
-                                                    <th>Год 6</th>
-                                                    <th>Год 7</th>
+                                                    <th class="sticky-year-column">Параметр</th>
+                                                    <th class="year-column year-1">Год 1</th>
+                                                    <th class="year-column year-2">Год 2</th>
+                                                    <th class="year-column year-3">Год 3</th>
+                                                    <th class="year-column year-4 halving-year">Год 4</th>
+                                                    <th class="year-column year-5">Год 5</th>
+                                                    <th class="year-column year-6">Год 6</th>
+                                                    <th class="year-column year-7">Год 7</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td>Цена Bitcoin (руб.) <span class="custom-tooltip">ⓘ
+                                                    <td class="sticky-year-column">Цена Bitcoin (руб.) <span class="custom-tooltip">ⓘ
                                                         <span class="tooltip-text">Прогнозируемая цена Bitcoin в рублях</span>
                                                     </span></td>
                                                     <td><input type="number" class="form-control form-control-sm" name="btcPrice_1" value="6000000"></td>
@@ -265,7 +327,7 @@
                                                     <td><input type="number" class="form-control form-control-sm" name="btcPrice_7" value="15000000"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Сложность майнинга (прирост %) <span class="custom-tooltip">ⓘ
+                                                    <td class="sticky-year-column">Сложность майнинга (прирост %) <span class="custom-tooltip">ⓘ
                                                         <span class="tooltip-text">Прогнозируемый годовой прирост сложности сети Bitcoin в процентах</span>
                                                     </span></td>
                                                     <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_1" value="5"></td>
@@ -277,7 +339,7 @@
                                                     <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_7" value="35"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Цена газа (руб./м³) <span class="custom-tooltip">ⓘ
+                                                    <td class="sticky-year-column">Цена газа (руб./м³) <span class="custom-tooltip">ⓘ
                                                         <span class="tooltip-text">Прогнозируемая цена на газ в рублях за кубический метр</span>
                                                     </span></td>
                                                     <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_1" value="6.5"></td>
@@ -289,7 +351,7 @@
                                                     <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_7" value="9.5"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Цена тепла (руб./Гкал) <span class="custom-tooltip">ⓘ
+                                                    <td class="sticky-year-column">Цена тепла (руб./Гкал) <span class="custom-tooltip">ⓘ
                                                         <span class="tooltip-text">Прогнозируемая цена реализации тепла в рублях за гигакалорию</span>
                                                     </span></td>
                                                     <td><input type="number" class="form-control form-control-sm" name="heatPrice_1" value="2500"></td>
@@ -301,7 +363,7 @@
                                                     <td><input type="number" class="form-control form-control-sm" name="heatPrice_7" value="4430"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Коэффициент использования (%) <span class="custom-tooltip">ⓘ
+                                                    <td class="sticky-year-column">Коэффициент использования (%) <span class="custom-tooltip">ⓘ
                                                         <span class="tooltip-text">Процент времени работы системы в течение года</span>
                                                     </span></td>
                                                     <td><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_1" value="95"></td>
@@ -315,9 +377,10 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    </div>
                                     <div class="mt-3">
-                                        <button type="button" class="btn btn-sm btn-info" id="applyInflation">Применить инфляцию к ценам</button>
-                                        <small class="text-muted ms-2">Желтым отмечен год, на который приходится халвинг</small>
+                                        <button type="button" class="btn btn-sm btn-info" id="applyInflation">Применить инфляцию</button>
+                                        <small class="text-muted ms-2 d-block mt-1">Желтым отмечен год халвинга</small>
                                     </div>
                                 </div>
                             </div>
@@ -362,6 +425,45 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Управление видимостью годовых столбцов на мобильных устройствах
+            document.querySelectorAll('.year-selector').forEach(selector => {
+                selector.addEventListener('change', function() {
+                    const selectedYear = this.value;
+
+                    if (selectedYear === 'all') {
+                        document.querySelectorAll('.year-column').forEach(col => {
+                            col.style.display = '';
+                        });
+                    } else {
+                        document.querySelectorAll('.year-column').forEach(col => {
+                            if (col.classList.contains(`year-${selectedYear}`)) {
+                                col.style.display = '';
+                            } else {
+                                col.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Сделать таблицы в отчете горизонтально прокручиваемыми
+            document.getElementById('generateReportBtn').addEventListener('click', function() {
+                // Существующий код генерации отчета...
+
+                // Добавить после генерации отчета:
+                setTimeout(() => {
+                    const tables = document.querySelectorAll('#reportPreview table');
+                    tables.forEach(table => {
+                        if (!table.parentElement.classList.contains('table-responsive')) {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'table-responsive';
+                            table.parentNode.insertBefore(wrapper, table);
+                            wrapper.appendChild(table);
+                        }
+                    });
+                }, 100);
+            });
+
             // Функция для получения ежедневного вознаграждения BTC с учетом сложности и халвингов
             function calculateDailyBtcReward(totalHashRate, year, difficultyGrowth) {
                 // Базовое вознаграждение на текущий момент (примерно)
