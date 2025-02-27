@@ -649,7 +649,7 @@
 
                 markdown += `## 4. Операционные показатели по годам\n\n`;
 
-                // Создаем таблицу с ежегодными показателями
+                // 4.1 Базовые параметры - таблица
                 markdown += `### 4.1 Базовые параметры\n\n`;
                 markdown += `| Показатель | ${yearlyResults.map(r => `Год ${r.year}`).join(' | ')} |\n`;
                 markdown += `|------------|${yearlyResults.map(() => '------').join('|')}|\n`;
@@ -660,6 +660,7 @@
                 markdown += `| Коэффициент использования (%) | ${yearlyResults.map(r => r.utilizationRate.toFixed(1)).join(' | ')} |\n`;
                 markdown += `| Себестоимость электроэнергии (руб./кВт·ч) | ${yearlyResults.map(r => r.electricityCostPerKWh.toFixed(2)).join(' | ')} |\n\n`;
 
+                // 4.2 Производство и потребление - таблица
                 markdown += `### 4.2 Производство и потребление\n\n`;
                 markdown += `| Показатель | ${yearlyResults.map(r => `Год ${r.year}`).join(' | ')} |\n`;
                 markdown += `|------------|${yearlyResults.map(() => '------').join('|')}|\n`;
@@ -671,6 +672,7 @@
                 markdown += `| Производство тепла от майнеров (Гкал) | ${yearlyResults.map(r => formatNumber(Math.round(r.minerHeatYearly))).join(' | ')} |\n`;
                 markdown += `| Общее производство тепла (Гкал) | ${yearlyResults.map(r => formatNumber(Math.round(r.totalHeatYearly))).join(' | ')} |\n\n`;
 
+                // 4.3 Финансовые показатели - таблица
                 markdown += `### 4.3 Финансовые показатели (тыс. руб.)\n\n`;
                 markdown += `| Показатель | ${yearlyResults.map(r => `Год ${r.year}`).join(' | ')} |\n`;
                 markdown += `|------------|${yearlyResults.map(() => '------').join('|')}|\n`;
@@ -685,8 +687,24 @@
                 markdown += `| Налог на майнинг (25%) | ${yearlyResults.map(r => formatNumber(Math.round(r.miningTax / 1000))).join(' | ')} |\n`;
                 markdown += `| Чистая прибыль | ${yearlyResults.map(r => formatNumber(Math.round(r.netProfit / 1000))).join(' | ')} |\n\n`;
 
-                // Расчет накопленной чистой прибыли и срока окупаемости
+                // 4.4 Сводные финансовые показатели
+                markdown += `### 4.4 Сводные финансовые показатели\n\n`;
+                markdown += `| Год | Общий доход | Общие расходы | EBITDA | Чистая прибыль | Накопленная прибыль |\n`;
+                markdown += `|-----|------------|---------------|--------|----------------|--------------------|\n`;
+
                 let cumulativeProfit = 0;
+                for (let i = 0; i < yearlyResults.length; i++) {
+                    const r = yearlyResults[i];
+                    const totalRevenue = r.miningRevenue + r.heatRevenue;
+                    cumulativeProfit += r.netProfit;
+
+                    markdown += `| ${r.year} | ${formatNumber(Math.round(totalRevenue / 1000))} | ${formatNumber(Math.round(r.operatingExpenses / 1000))} | ${formatNumber(Math.round(r.ebitda / 1000))} | ${formatNumber(Math.round(r.netProfit / 1000))} | ${formatNumber(Math.round(cumulativeProfit / 1000))} |\n`;
+                }
+
+                markdown += '\n';
+
+                // Расчет накопленной чистой прибыли и срока окупаемости
+                cumulativeProfit = 0;
                 let paybackYear = 0;
                 let paybackMonth = 0;
 
