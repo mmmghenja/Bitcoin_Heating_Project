@@ -1,10 +1,538 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Bitcoin_Heating_Project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Heating Project</title>
+    <!-- Подключаем Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .preview {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+        }
+        .equipment-row {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Bitcoin Heating Project</h1>
+    <div class="container mt-4 mb-5">
+        <h1>Bitcoin Heating Project</h1>
+        <p class="lead">Конфигуратор бюджета проекта с учетом прибыльности майнинга и отопления</p>
+
+        <!-- Вкладки для переключения между данными и отчетом -->
+        <ul class="nav nav-tabs" id="projectTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="input-tab" data-bs-toggle="tab" data-bs-target="#input"
+                  type="button" role="tab" aria-controls="input" aria-selected="true">Исходные данные</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report"
+                  type="button" role="tab" aria-controls="report" aria-selected="false">Отчет</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="projectTabsContent">
+            <!-- Вкладка с формой ввода данных -->
+            <div class="tab-pane fade show active" id="input" role="tabpanel" aria-labelledby="input-tab">
+                <form id="projectDataForm" class="mt-4">
+                    <!-- Общие параметры проекта -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Общие параметры проекта</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label for="projectName" class="col-sm-4 col-form-label">Название проекта</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="projectName" name="projectName"
+                                      value="Bitcoin Heating Project" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="bitcoinPrice" class="col-sm-4 col-form-label">Текущая цена Bitcoin ($)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control" id="bitcoinPrice" name="bitcoinPrice"
+                                      value="62000" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="electricityCost" class="col-sm-4 col-form-label">Стоимость электроэнергии ($/кВт·ч)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" step="0.001" class="form-control" id="electricityCost"
+                                      name="electricityCost" value="0.068" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Оборудование для майнинга -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Оборудование для майнинга</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label for="minerModel" class="col-sm-4 col-form-label">Модель ASIC майнера</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="minerModel" name="minerModel"
+                                      value="Antminer S19 XP" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="hashRate" class="col-sm-4 col-form-label">Хешрейт (TH/s)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" step="0.1" class="form-control" id="hashRate"
+                                      name="hashRate" value="140" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="minerPower" class="col-sm-4 col-form-label">Энергопотребление (Вт)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control" id="minerPower" name="minerPower"
+                                      value="3010" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="minerCost" class="col-sm-4 col-form-label">Стоимость майнера ($)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control" id="minerCost" name="minerCost"
+                                      value="4500" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="minerCount" class="col-sm-4 col-form-label">Количество майнеров (шт)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control" id="minerCount" name="minerCount"
+                                      value="10" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительное оборудование -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>Дополнительное оборудование</h5>
+                            <button type="button" class="btn btn-sm btn-primary" id="addEquipmentBtn">
+                                Добавить оборудование
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="additionalEquipment">
+                                <!-- Динамически добавляемые строки оборудования -->
+                                <div class="row equipment-row">
+                                    <div class="col-sm-4 mb-2">
+                                        <input type="text" class="form-control" placeholder="Название"
+                                          name="equipName[]" value="PSU">
+                                    </div>
+                                    <div class="col-sm-3 mb-2">
+                                        <input type="number" class="form-control" placeholder="Цена ($)"
+                                          name="equipCost[]" value="200">
+                                    </div>
+                                    <div class="col-sm-3 mb-2">
+                                        <input type="number" class="form-control" placeholder="Количество"
+                                          name="equipCount[]" value="10">
+                                    </div>
+                                    <div class="col-sm-2 mb-2">
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row equipment-row">
+                                    <div class="col-sm-4 mb-2">
+                                        <input type="text" class="form-control" placeholder="Название"
+                                          name="equipName[]" value="Нагреватель помещения">
+                                    </div>
+                                    <div class="col-sm-3 mb-2">
+                                        <input type="number" class="form-control" placeholder="Цена ($)"
+                                          name="equipCost[]" value="350">
+                                    </div>
+                                    <div class="col-sm-3 mb-2">
+                                        <input type="number" class="form-control" placeholder="Количество"
+                                          name="equipCount[]" value="5">
+                                    </div>
+                                    <div class="col-sm-2 mb-2">
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Параметры отопления -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Параметры отопления</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label for="heatingArea" class="col-sm-4 col-form-label">Отапливаемая площадь (м²)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control" id="heatingArea" name="heatingArea"
+                                      value="200" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="heatingMonths" class="col-sm-4 col-form-label">Отопительный сезон (месяцев)</label>
+                                <div class="col-sm-8">
+                                    <input type="number" class="form-control" id="heatingMonths" name="heatingMonths"
+                                      value="7" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="standardHeatingCost" class="col-sm-4 col-form-label">
+                                    Стоимость обычного отопления ($/м²/месяц)
+                                </label>
+                                <div class="col-sm-8">
+                                    <input type="number" step="0.01" class="form-control" id="standardHeatingCost"
+                                      name="standardHeatingCost" value="1.2" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="heatUtilization" class="col-sm-4 col-form-label">
+                                    Процент утилизации тепла от майнеров (%)
+                                </label>
+                                <div class="col-sm-8">
+                                    <input type="number" step="1" min="0" max="100" class="form-control"
+                                      id="heatUtilization" name="heatUtilization" value="80" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки управления -->
+                    <div class="d-flex justify-content-between mb-5">
+                        <div>
+                            <button type="button" class="btn btn-primary me-2" id="saveDataBtn">Сохранить данные</button>
+                            <button type="button" class="btn btn-secondary" id="loadDataBtn">Загрузить данные</button>
+                        </div>
+                        <button type="button" class="btn btn-success" id="generateReportBtn">Сгенерировать отчет</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Вкладка с отчетом -->
+            <div class="tab-pane fade" id="report" role="tabpanel" aria-labelledby="report-tab">
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-outline-primary" id="copyMarkdownBtn">
+                        Скопировать Markdown
+                    </button>
+                </div>
+                <div class="preview mt-3" id="reportPreview">
+                    <p class="text-muted">Отчет будет отображен здесь после генерации</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем необходимые JavaScript библиотеки -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Кнопка добавления оборудования
+            document.getElementById('addEquipmentBtn').addEventListener('click', function() {
+                const equipmentContainer = document.getElementById('additionalEquipment');
+                const newRow = document.createElement('div');
+                newRow.className = 'row equipment-row';
+                newRow.innerHTML = `
+                    <div class="col-sm-4 mb-2">
+                        <input type="text" class="form-control" placeholder="Название" name="equipName[]">
+                    </div>
+                    <div class="col-sm-3 mb-2">
+                        <input type="number" class="form-control" placeholder="Цена ($)" name="equipCost[]">
+                    </div>
+                    <div class="col-sm-3 mb-2">
+                        <input type="number" class="form-control" placeholder="Количество" name="equipCount[]" value="1">
+                    </div>
+                    <div class="col-sm-2 mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">Удалить</button>
+                    </div>
+                `;
+                equipmentContainer.appendChild(newRow);
+
+                // Добавляем обработчик для новой кнопки удаления
+                addRemoveEquipmentHandlers();
+            });
+
+            // Обработчики для кнопок удаления оборудования
+            function addRemoveEquipmentHandlers() {
+                document.querySelectorAll('.remove-equip').forEach(button => {
+                    button.addEventListener('click', function() {
+                        this.closest('.equipment-row').remove();
+                    });
+                });
+            }
+
+            // Инициализируем обработчики для существующих кнопок
+            addRemoveEquipmentHandlers();
+
+            // Сохранение данных в localStorage
+            document.getElementById('saveDataBtn').addEventListener('click', function() {
+                const formData = new FormData(document.getElementById('projectDataForm'));
+                const data = {};
+
+                // Преобразуем FormData в объект
+                for (const [key, value] of formData.entries()) {
+                    if (key.endsWith('[]')) {
+                        // Обработка массивов для доп. оборудования
+                        const baseKey = key.slice(0, -2);
+                        if (!data[baseKey]) {
+                            data[baseKey] = [];
+                        }
+                        data[baseKey].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
+
+                // Сохранение данных
+                localStorage.setItem('bitcoinHeatingData', JSON.stringify(data));
+                alert('Данные успешно сохранены!');
+            });
+
+            // Загрузка данных из localStorage
+            document.getElementById('loadDataBtn').addEventListener('click', function() {
+                const savedData = localStorage.getItem('bitcoinHeatingData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+
+                    // Заполняем обычные поля
+                    for (const key in data) {
+                        if (!Array.isArray(data[key])) {
+                            const inputField = document.getElementById(key);
+                            if (inputField) {
+                                inputField.value = data[key];
+                            }
+                        }
+                    }
+
+                    // Обрабатываем дополнительное оборудование
+                    if (data.equipName && Array.isArray(data.equipName) && data.equipName.length > 0) {
+                        const equipmentContainer = document.getElementById('additionalEquipment');
+                        equipmentContainer.innerHTML = ''; // Очищаем текущие строки
+
+                        for (let i = 0; i < data.equipName.length; i++) {
+                            const newRow = document.createElement('div');
+                            newRow.className = 'row equipment-row';
+                            newRow.innerHTML = `
+                                <div class="col-sm-4 mb-2">
+                                    <input type="text" class="form-control" placeholder="Название"
+                                      name="equipName[]" value="${data.equipName[i] || ''}">
+                                </div>
+                                <div class="col-sm-3 mb-2">
+                                    <input type="number" class="form-control" placeholder="Цена ($)"
+                                      name="equipCost[]" value="${data.equipCost[i] || ''}">
+                                </div>
+                                <div class="col-sm-3 mb-2">
+                                    <input type="number" class="form-control" placeholder="Количество"
+                                      name="equipCount[]" value="${data.equipCount[i] || 1}">
+                                </div>
+                                <div class="col-sm-2 mb-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">
+                                        Удалить
+                                    </button>
+                                </div>
+                            `;
+                            equipmentContainer.appendChild(newRow);
+                        }
+
+                        // Обновляем обработчики для кнопок удаления
+                        addRemoveEquipmentHandlers();
+                    }
+
+                    alert('Данные успешно загружены!');
+                } else {
+                    alert('Нет сохраненных данных!');
+                }
+            });
+
+            // Генерация отчета
+            document.getElementById('generateReportBtn').addEventListener('click', function() {
+                const form = document.getElementById('projectDataForm');
+
+                // Собираем все данные формы
+                const formData = new FormData(form);
+                const data = {};
+
+                for (const [key, value] of formData.entries()) {
+                    if (key.endsWith('[]')) {
+                        const baseKey = key.slice(0, -2);
+                        if (!data[baseKey]) {
+                            data[baseKey] = [];
+                        }
+                        data[baseKey].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
+
+                // Парсим числовые значения
+                const projectName = data.projectName;
+                const bitcoinPrice = parseFloat(data.bitcoinPrice);
+                const electricityCost = parseFloat(data.electricityCost);
+                const minerModel = data.minerModel;
+                const hashRate = parseFloat(data.hashRate);
+                const minerPower = parseFloat(data.minerPower);
+                const minerCost = parseFloat(data.minerCost);
+                const minerCount = parseInt(data.minerCount);
+                const heatingArea = parseFloat(data.heatingArea);
+                const heatingMonths = parseInt(data.heatingMonths);
+                const standardHeatingCost = parseFloat(data.standardHeatingCost);
+                const heatUtilization = parseFloat(data.heatUtilization) / 100;
+
+                // Расчеты для майнинга
+                const totalHashRate = hashRate * minerCount;
+                const dailyBtcReward = totalHashRate * 0.000001; // Примерная формула, нужно уточнить
+                const dailyBtcRevenue = dailyBtcReward * bitcoinPrice;
+
+                const totalPowerKW = (minerPower * minerCount) / 1000;
+                const dailyPowerKWh = totalPowerKW * 24;
+                const dailyElectricityCost = dailyPowerKWh * electricityCost;
+
+                const dailyMiningProfit = dailyBtcRevenue - dailyElectricityCost;
+                const monthlyMiningProfit = dailyMiningProfit * 30;
+                const yearlyMiningProfit = dailyMiningProfit * 365;
+
+                // Стоимость оборудования
+                const totalMinerCost = minerCost * minerCount;
+                let totalAdditionalCost = 0;
+
+                // Считаем стоимость дополнительного оборудования
+                if (data.equipName && data.equipName.length > 0) {
+                    for (let i = 0; i < data.equipName.length; i++) {
+                        const cost = parseFloat(data.equipCost[i]) || 0;
+                        const count = parseInt(data.equipCount[i]) || 1;
+                        totalAdditionalCost += cost * count;
+                    }
+                }
+
+                const totalEquipmentCost = totalMinerCost + totalAdditionalCost;
+
+                // Расчеты для отопления
+                const annualStandardHeatingCost = heatingArea * standardHeatingCost * heatingMonths;
+                const generatedHeatKW = totalPowerKW * heatUtilization;
+                const dailyHeatingValue = generatedHeatKW * 24 * electricityCost; // Стоимость генерируемого тепла
+
+                const heatingDays = heatingMonths * 30;
+                const annualHeatingValue = dailyHeatingValue * heatingDays;
+
+                // Расчет окупаемости
+                const totalAnnualProfit = yearlyMiningProfit + annualHeatingValue;
+                const paybackDays = totalEquipmentCost / (totalAnnualProfit / 365);
+                const paybackMonths = paybackDays / 30;
+                const roi = (totalAnnualProfit / totalEquipmentCost) * 100;
+
+                // Формируем Markdown отчет
+                let markdown = `# ${projectName} - Бюджет проекта\n\n`;
+
+                markdown += `## Общая информация\n\n`;
+                markdown += `- **Дата расчета**: ${new Date().toLocaleDateString()}\n`;
+                markdown += `- **Цена Bitcoin**: $${bitcoinPrice.toFixed(2)}\n`;
+                markdown += `- **Стоимость электроэнергии**: $${electricityCost.toFixed(3)} за кВт·ч\n\n`;
+
+                markdown += `## Оборудование для майнинга\n\n`;
+                markdown += `- **Модель майнера**: ${minerModel}\n`;
+                markdown += `- **Количество майнеров**: ${minerCount} шт.\n`;
+                markdown += `- **Хешрейт одного майнера**: ${hashRate} TH/s\n`;
+                markdown += `- **Общий хешрейт**: ${totalHashRate} TH/s\n`;
+                markdown += `- **Энергопотребление одного майнера**: ${minerPower} Вт\n`;
+                markdown += `- **Общее энергопотребление**: ${totalPowerKW.toFixed(2)} кВт\n\n`;
+
+                markdown += `## Стоимость оборудования\n\n`;
+                markdown += `| Оборудование | Стоимость ($) | Количество | Общая стоимость ($) |\n`;
+                markdown += `|-------------|---------------|------------|--------------------|\n`;
+                markdown += `| ${minerModel} | ${minerCost.toFixed(2)} | ${minerCount} | ${totalMinerCost.toFixed(2)} |\n`;
+
+                // Добавляем строки для дополнительного оборудования
+                if (data.equipName && data.equipName.length > 0) {
+                    for (let i = 0; i < data.equipName.length; i++) {
+                        const name = data.equipName[i];
+                        const cost = parseFloat(data.equipCost[i]) || 0;
+                        const count = parseInt(data.equipCount[i]) || 1;
+                        const totalCost = cost * count;
+
+                        markdown += `| ${name} | ${cost.toFixed(2)} | ${count} | ${totalCost.toFixed(2)} |\n`;
+                    }
+                }
+
+                markdown += `| **ИТОГО** | | | **${totalEquipmentCost.toFixed(2)}** |\n\n`;
+
+                markdown += `## Прибыльность майнинга\n\n`;
+                markdown += `- **Ежедневная добыча Bitcoin**: ${dailyBtcReward.toFixed(8)} BTC\n`;
+                markdown += `- **Ежедневный доход от майнинга**: $${dailyBtcRevenue.toFixed(2)}\n`;
+                markdown += `- **Ежедневные затраты на электроэнергию**: $${dailyElectricityCost.toFixed(2)}\n`;
+                markdown += `- **Ежедневная чистая прибыль от майнинга**: $${dailyMiningProfit.toFixed(2)}\n`;
+                markdown += `- **Ежемесячная чистая прибыль от майнинга**: $${monthlyMiningProfit.toFixed(2)}\n`;
+                markdown += `- **Годовая чистая прибыль от майнинга**: $${yearlyMiningProfit.toFixed(2)}\n\n`;
+
+                markdown += `## Отопление помещения\n\n`;
+                markdown += `- **Отапливаемая площадь**: ${heatingArea} м²\n`;
+                markdown += `- **Продолжительность отопительного сезона**: ${heatingMonths} месяцев\n`;
+                markdown += `- **Стоимость стандартного отопления**: $${standardHeatingCost.toFixed(2)} за м² в месяц\n`;
+                markdown += `- **Годовая стоимость стандартного отопления**: $${annualStandardHeatingCost.toFixed(2)}\n`;
+                markdown += `- **Утилизация тепла от майнеров**: ${heatUtilization * 100}%\n`;
+                markdown += `- **Генерируемая тепловая мощность**: ${generatedHeatKW.toFixed(2)} кВт\n`;
+                markdown += `- **Ежедневная экономия на отоплении**: $${dailyHeatingValue.toFixed(2)}\n`;
+                markdown += `- **Годовая экономия на отоплении**: $${annualHeatingValue.toFixed(2)}\n\n`;
+
+                markdown += `## Окупаемость проекта\n\n`;
+                markdown += `- **Общая годовая прибыль**: $${totalAnnualProfit.toFixed(2)}\n`;
+                markdown += `- **Срок окупаемости**: ${Math.round(paybackDays)} дней (${paybackMonths.toFixed(1)} месяцев)\n`;
+                markdown += `- **Рентабельность инвестиций (ROI)**: ${roi.toFixed(2)}%\n\n`;
+
+                // Примечания и выводы
+                markdown += `## Примечания\n\n`;
+                markdown += `- Расчеты основаны на текущей цене Bitcoin и могут изменяться в зависимости от рыночных условий.\n`;
+                markdown += `- Не учтены затраты на техническое обслуживание и возможные простои оборудования.\n`;
+                markdown += `- Экономия на отоплении рассчитана исходя из утилизации тепла майнеров в течение отопительного сезона.\n`;
+                markdown += `- В расчете не учтена инфляция и изменение сложности майнинга Bitcoin.\n\n`;
+
+                markdown += `## Вывод\n\n`;
+                if (paybackMonths <= 12) {
+                    markdown += `Проект имеет хорошую окупаемость в течение ${paybackMonths.toFixed(1)} месяцев. `;
+                    markdown += `Использование тепла от майнинга для отопления помещения позволяет `;
+                    markdown += `существенно повысить общую эффективность проекта и снизить срок окупаемости.`;
+                } else {
+                    markdown += `Проект имеет срок окупаемости ${paybackMonths.toFixed(1)} месяцев, что превышает 1 год. `;
+                    markdown += `Рекомендуется рассмотреть возможность оптимизации затрат или `;
+                    markdown += `увеличения эффективности использования тепла.`;
+                }
+
+                // Сохраняем сгенерированный отчет
+                localStorage.setItem('bitcoinHeatingReport', markdown);
+
+                // Отображаем отчет
+                document.getElementById('reportPreview').innerHTML = marked.parse(markdown);
+
+                // Переключаемся на вкладку отчета
+                document.getElementById('report-tab').click();
+            });
+
+            // Копирование Markdown в буфер обмена
+            document.getElementById('copyMarkdownBtn').addEventListener('click', function() {
+                const report = localStorage.getItem('bitcoinHeatingReport');
+                if (report) {
+                    navigator.clipboard.writeText(report)
+                        .then(() => alert('Markdown успешно скопирован в буфер обмена!'))
+                        .catch(err => console.error('Не удалось скопировать текст: ', err));
+                } else {
+                    alert('Сначала сгенерируйте отчет!');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
