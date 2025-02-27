@@ -1,4 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('instructionBtn').addEventListener('click', function() {
+        // Создаем модальное окно, если еще не создано
+        const instructionModal = new bootstrap.Modal(document.getElementById('instructionModal'));
+
+        // Загружаем содержимое инструкции
+        fetch('instruction.md')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Не удалось загрузить инструкцию');
+                }
+                return response.text();
+            })
+            .then(markdownText => {
+                // Преобразуем Markdown в HTML с помощью библиотеки marked
+                const htmlContent = marked.parse(markdownText);
+
+                // Вставляем HTML в модальное окно
+                document.getElementById('instructionContent').innerHTML = htmlContent;
+
+                // Показываем модальное окно
+                instructionModal.show();
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке инструкции:', error);
+                document.getElementById('instructionContent').innerHTML =
+                    '<div class="alert alert-danger">Не удалось загрузить инструкцию. Пожалуйста, обновите страницу и попробуйте снова.</div>';
+                instructionModal.show();
+            });
+    });
+
     // Управление видимостью годовых столбцов на мобильных устройствах
     document.querySelectorAll('.year-selector').forEach(selector => {
         selector.addEventListener('change', function() {

@@ -196,3 +196,44 @@
         padding: 5px 6px;
     }
 }
+
+/* Стили для инструкции */
+#instructionContent h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    color: #0d6efd;
+}
+
+#instructionContent h2 {
+    font-size: 1.4rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #198754;
+}
+
+#instructionContent ul,
+#instructionContent ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+#instructionContent li {
+    margin-bottom: 0.5rem;
+}
+
+/* Специальные стили для мобильных устройств */
+@media (max-width: 768px) {
+    #instructionBtn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        margin-right: 0.5rem;
+    }
+
+    #instructionContent h1 {
+        font-size: 1.5rem;
+    }
+
+    #instructionContent h2 {
+        font-size: 1.25rem;
+    }
+}
