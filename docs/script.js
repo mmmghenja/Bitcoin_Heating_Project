@@ -5,16 +5,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedYear = this.value;
 
             if (selectedYear === 'all') {
+                // Показываем все столбцы
                 document.querySelectorAll('.year-column').forEach(col => {
                     col.style.display = '';
                 });
             } else {
+                // Показываем только выбранный год
                 document.querySelectorAll('.year-column').forEach(col => {
                     if (col.classList.contains(`year-${selectedYear}`)) {
                         col.style.display = '';
                     } else {
                         col.style.display = 'none';
                     }
+                });
+            }
+
+            // Обновляем стили для лучшего визуального отображения
+            if (selectedYear !== 'all') {
+                document.querySelectorAll('.sticky-year-column').forEach(col => {
+                    col.style.borderRight = '2px solid #dee2e6';
+                });
+            } else {
+                document.querySelectorAll('.sticky-year-column').forEach(col => {
+                    col.style.borderRight = '';
                 });
             }
         });
