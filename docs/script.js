@@ -465,6 +465,36 @@ document.addEventListener('DOMContentLoaded', function() {
         // Отображаем отчет
         document.getElementById('reportPreview').innerHTML = marked.parse(markdown);
 
+        // Улучшение стилизации таблиц в отчете
+        setTimeout(() => {
+            // Обернем все таблицы для прокрутки на мобильных
+            const tables = document.querySelectorAll('#reportPreview table');
+            tables.forEach(table => {
+                // Добавляем контейнер для горизонтальной прокрутки
+                if (!table.parentElement.classList.contains('table-responsive')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-responsive';
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                }
+
+                // Выделим итоговые строки
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const firstCell = row.cells[0];
+                    if (firstCell && (
+                        firstCell.textContent.includes('ИТОГО') ||
+                        firstCell.textContent.includes('Всего') ||
+                        firstCell.textContent.includes('CAPEX') ||
+                        firstCell.textContent.includes('Чистая прибыль') ||
+                        firstCell.textContent.includes('Общее производство')
+                    )) {
+                        row.classList.add('total-row');
+                    }
+                });
+            });
+        }, 100);
+
         // Переключаемся на вкладку отчета
         document.getElementById('report-tab').click();
     });
@@ -495,12 +525,25 @@ document.addEventListener('DOMContentLoaded', function() {
         pdfElement.style.fontSize = '12pt';
         pdfElement.style.lineHeight = '1.5';
 
+        // Добавляем специальные стили для таблиц в PDF
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { padding: 8px; border: 1px solid #666; }
+            th { background-color: #f0f4f8; font-weight: bold; text-align: center; }
+            td { text-align: right; }
+            td:first-child { text-align: left; font-weight: 500; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            .total-row td { font-weight: bold; background-color: #e6f3ff; }
+        `;
+        pdfElement.appendChild(styleElement);
+
         const opt = {
-            margin: [10, 10, 10, 10],
+            margin: [15, 10, 15, 10],
             filename: 'Bitcoin_Heating_Project_Report.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
         };
 
         html2pdf().set(opt).from(pdfElement).save();

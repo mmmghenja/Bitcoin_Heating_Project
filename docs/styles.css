@@ -139,3 +139,60 @@
         100% { transform: translateX(0); }
     }
 }
+
+
+/* Стили для таблиц в отчете */
+.preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.preview table th,
+.preview table td {
+    padding: 8px 10px;
+    border: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.preview table th {
+    background-color: #f0f4f8;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 2px solid #c0c9d6;
+}
+
+/* Выравнивание текста по левому краю, а чисел - по правому */
+.preview table td {
+    text-align: right;
+}
+
+.preview table td:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Зебра для лучшей читаемости строк */
+.preview table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Выделение итоговых строк */
+.preview table tr.total-row td {
+    font-weight: bold;
+    border-top: 2px solid #6c757d;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .preview table {
+        font-size: 0.8rem;
+    }
+
+    .preview table th,
+    .preview table td {
+        padding: 5px 6px;
+    }
+}
