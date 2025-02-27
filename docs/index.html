@@ -3,222 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitcoin Heating Project</title>
-    <!-- Подключаем Bootstrap CSS -->
+    <title>Bitcoin Heating Project Calculator</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        .card {
+            margin-bottom: 20px;
+        }
+        .section-header {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        .table-sm td, .table-sm th {
+            padding: 0.25rem;
+        }
+        .halving-year {
+            background-color: rgba(255, 215, 0, 0.2) !important;
+        }
         .preview {
             border: 1px solid #ddd;
             padding: 15px;
             margin-top: 20px;
-            background-color: #f9f9f9;
+            background-color: #f9f9fa;
+            overflow-x: auto;
         }
-        .card-header {
-            background-color: #f8f9fa;
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 1000;
+            border-bottom: 1px solid #dee2e6;
         }
-        .equipment-row {
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-            margin-bottom: 10px;
+        .custom-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .custom-tooltip .tooltip-text {
+            visibility: hidden;
+            width: 300px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -150px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .custom-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .input-group-text {
+            min-width: 40px;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4 mb-5">
-        <h1>Bitcoin Heating Project</h1>
-        <p class="lead">Конфигуратор бюджета проекта с учетом прибыльности майнинга и отопления</p>
-
-        <!-- Вкладки для переключения между данными и отчетом -->
-        <ul class="nav nav-tabs" id="projectTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="input-tab" data-bs-toggle="tab" data-bs-target="#input"
-                  type="button" role="tab" aria-controls="input" aria-selected="true">Исходные данные</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report"
-                  type="button" role="tab" aria-controls="report" aria-selected="false">Отчет</button>
-            </li>
-        </ul>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 sticky-header mb-2 pt-2">
+                <h2 class="text-center">Bitcoin Heating Project - Калькулятор</h2>
+                <ul class="nav nav-tabs" id="projectTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="input-tab" data-bs-toggle="tab" data-bs-target="#input"
+                          type="button" role="tab" aria-controls="input" aria-selected="true">Исходные данные</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report"
+                          type="button" role="tab" aria-controls="report" aria-selected="false">Отчет</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
         <div class="tab-content" id="projectTabsContent">
             <!-- Вкладка с формой ввода данных -->
             <div class="tab-pane fade show active" id="input" role="tabpanel" aria-labelledby="input-tab">
-                <form id="projectDataForm" class="mt-4">
-                    <!-- Общие параметры проекта -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5>Общие параметры проекта</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <label for="projectName" class="col-sm-4 col-form-label">Название проекта</label>
-                                <div class="col-sm-8">
-                                    <input type="text" class="form-control" id="projectName" name="projectName"
-                                      value="Bitcoin Heating Project" required>
+                <form id="projectDataForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Капитальные затраты (CAPEX) -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Капитальные затраты (CAPEX)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <label for="generatorPower" class="col-sm-7 col-form-label">Мощность газопоршневого генератора (МВт)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="generatorPower" name="generatorPower" value="2.2">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="generatorCost" class="col-sm-7 col-form-label">Стоимость газопоршневого генератора (руб.)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="generatorCost" name="generatorCost" value="75000000">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="heatUtilizationCost" class="col-sm-7 col-form-label">Стоимость системы утилизации тепла (руб.)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="heatUtilizationCost" name="heatUtilizationCost" value="18859764">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="chillerPower" class="col-sm-7 col-form-label">Мощность абсорбционного холодильника (МВт)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="chillerPower" name="chillerPower" value="2">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="chillerCost" class="col-sm-7 col-form-label">Стоимость абсорбционного холодильника (руб.)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="chillerCost" name="chillerCost" value="75000000">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="coolingTowersPower" class="col-sm-7 col-form-label">Мощность градирен (МВт)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="coolingTowersPower" name="coolingTowersPower" value="4.1">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="coolingTowersCost" class="col-sm-7 col-form-label">Стоимость градирен (руб.)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="coolingTowersCost" name="coolingTowersCost" value="50000000">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="controlSystemCost" class="col-sm-7 col-form-label">Стоимость АСУ (руб.)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="controlSystemCost" name="controlSystemCost" value="15000000">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <label for="bitcoinPrice" class="col-sm-4 col-form-label">Текущая цена Bitcoin ($)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" class="form-control" id="bitcoinPrice" name="bitcoinPrice"
-                                      value="62000" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="electricityCost" class="col-sm-4 col-form-label">Стоимость электроэнергии ($/кВт·ч)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" step="0.001" class="form-control" id="electricityCost"
-                                      name="electricityCost" value="0.068" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Оборудование для майнинга -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5>Оборудование для майнинга</h5>
+                            <!-- Параметры майнинга -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Параметры майнинга</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <label for="minerModel" class="col-sm-7 col-form-label">Модель ASIC майнера</label>
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control" id="minerModel" name="minerModel" value="S19 XP+ Hyd">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="hashRate" class="col-sm-7 col-form-label">Хешрейт одного майнера (TH/s)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="hashRate" name="hashRate" value="279">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="minerPower" class="col-sm-7 col-form-label">Энергопотребление одного майнера (Вт)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="minerPower" name="minerPower" value="5301">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="minerCost" class="col-sm-7 col-form-label">Стоимость одного майнера (руб.)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="minerCost" name="minerCost" value="301000">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="minerCount" class="col-sm-7 col-form-label">Количество майнеров (шт)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="minerCount" name="minerCount" value="377">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="genEfficiencyElec" class="col-sm-7 col-form-label">КПД генератора по электричеству (%)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="genEfficiencyElec" name="genEfficiencyElec" value="40">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="genEfficiencyHeat" class="col-sm-7 col-form-label">КПД генератора по теплу (%)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="genEfficiencyHeat" name="genEfficiencyHeat" value="80">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="gasConsumption" class="col-sm-7 col-form-label">Расход газа (м³/кВт·ч)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.01" class="form-control" id="gasConsumption" name="gasConsumption" value="0.3">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="asicHeatRecovery" class="col-sm-7 col-form-label">Утилизация тепла от асиков (%)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="1" class="form-control" id="asicHeatRecovery" name="asicHeatRecovery" value="90">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="maintenancePercent" class="col-sm-7 col-form-label">Обслуживание системы (% от CAPEX в год)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="maintenancePercent" name="maintenancePercent" value="5">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="additionalTaxes" class="col-sm-7 col-form-label">Дополнительные налоги (руб. в год)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" class="form-control" id="additionalTaxes" name="additionalTaxes" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="defaultInflation" class="col-sm-7 col-form-label">Инфляция (%)</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" step="0.1" class="form-control" id="defaultInflation" name="defaultInflation" value="10">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <label for="minerModel" class="col-sm-4 col-form-label">Модель ASIC майнера</label>
-                                <div class="col-sm-8">
-                                    <input type="text" class="form-control" id="minerModel" name="minerModel"
-                                      value="Antminer S19 XP" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="hashRate" class="col-sm-4 col-form-label">Хешрейт (TH/s)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" step="0.1" class="form-control" id="hashRate"
-                                      name="hashRate" value="140" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="minerPower" class="col-sm-4 col-form-label">Энергопотребление (Вт)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" class="form-control" id="minerPower" name="minerPower"
-                                      value="3010" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="minerCost" class="col-sm-4 col-form-label">Стоимость майнера ($)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" class="form-control" id="minerCost" name="minerCost"
-                                      value="4500" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="minerCount" class="col-sm-4 col-form-label">Количество майнеров (шт)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" class="form-control" id="minerCount" name="minerCount"
-                                      value="10" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Дополнительное оборудование -->
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>Дополнительное оборудование</h5>
-                            <button type="button" class="btn btn-sm btn-primary" id="addEquipmentBtn">
-                                Добавить оборудование
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div id="additionalEquipment">
-                                <!-- Динамически добавляемые строки оборудования -->
-                                <div class="row equipment-row">
-                                    <div class="col-sm-4 mb-2">
-                                        <input type="text" class="form-control" placeholder="Название"
-                                          name="equipName[]" value="PSU">
-                                    </div>
-                                    <div class="col-sm-3 mb-2">
-                                        <input type="number" class="form-control" placeholder="Цена ($)"
-                                          name="equipCost[]" value="200">
-                                    </div>
-                                    <div class="col-sm-3 mb-2">
-                                        <input type="number" class="form-control" placeholder="Количество"
-                                          name="equipCount[]" value="10">
-                                    </div>
-                                    <div class="col-sm-2 mb-2">
-                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">
-                                            Удалить
-                                        </button>
-                                    </div>
+                        <div class="col-md-6">
+                            <!-- Параметры по годам -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Прогнозные показатели на 7 лет</h5>
                                 </div>
-                                <div class="row equipment-row">
-                                    <div class="col-sm-4 mb-2">
-                                        <input type="text" class="form-control" placeholder="Название"
-                                          name="equipName[]" value="Нагреватель помещения">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover" id="yearlyParamsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Параметр</th>
+                                                    <th>Год 1</th>
+                                                    <th>Год 2</th>
+                                                    <th>Год 3</th>
+                                                    <th>Год 4</th>
+                                                    <th>Год 5</th>
+                                                    <th>Год 6</th>
+                                                    <th>Год 7</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Цена Bitcoin (руб.) <span class="custom-tooltip">ⓘ
+                                                        <span class="tooltip-text">Прогнозируемая цена Bitcoin в рублях</span>
+                                                    </span></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="btcPrice_1" value="6000000"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="btcPrice_2" value="7000000"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="btcPrice_3" value="8000000"></td>
+                                                    <td class="halving-year"><input type="number" class="form-control form-control-sm" name="btcPrice_4" value="12000000"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="btcPrice_5" value="13000000"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="btcPrice_6" value="14000000"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="btcPrice_7" value="15000000"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Сложность майнинга (прирост %) <span class="custom-tooltip">ⓘ
+                                                        <span class="tooltip-text">Прогнозируемый годовой прирост сложности сети Bitcoin в процентах</span>
+                                                    </span></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_1" value="5"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_2" value="10"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_3" value="15"></td>
+                                                    <td class="halving-year"><input type="number" class="form-control form-control-sm" name="difficultyGrowth_4" value="20"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_5" value="25"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_6" value="30"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="difficultyGrowth_7" value="35"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Цена газа (руб./м³) <span class="custom-tooltip">ⓘ
+                                                        <span class="tooltip-text">Прогнозируемая цена на газ в рублях за кубический метр</span>
+                                                    </span></td>
+                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_1" value="6.5"></td>
+                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_2" value="7"></td>
+                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_3" value="7.5"></td>
+                                                    <td class="halving-year"><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_4" value="8"></td>
+                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_5" value="8.5"></td>
+                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_6" value="9"></td>
+                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" name="gasPrice_7" value="9.5"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Цена тепла (руб./Гкал) <span class="custom-tooltip">ⓘ
+                                                        <span class="tooltip-text">Прогнозируемая цена реализации тепла в рублях за гигакалорию</span>
+                                                    </span></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="heatPrice_1" value="2500"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="heatPrice_2" value="2750"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="heatPrice_3" value="3025"></td>
+                                                    <td class="halving-year"><input type="number" class="form-control form-control-sm" name="heatPrice_4" value="3330"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="heatPrice_5" value="3660"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="heatPrice_6" value="4025"></td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="heatPrice_7" value="4430"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Коэффициент использования (%) <span class="custom-tooltip">ⓘ
+                                                        <span class="tooltip-text">Процент времени работы системы в течение года</span>
+                                                    </span></td>
+                                                    <td><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_1" value="95"></td>
+                                                    <td><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_2" value="95"></td>
+                                                    <td><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_3" value="95"></td>
+                                                    <td class="halving-year"><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_4" value="95"></td>
+                                                    <td><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_5" value="95"></td>
+                                                    <td><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_6" value="95"></td>
+                                                    <td><input type="number" step="1" min="1" max="100" class="form-control form-control-sm" name="utilizationRate_7" value="95"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div class="col-sm-3 mb-2">
-                                        <input type="number" class="form-control" placeholder="Цена ($)"
-                                          name="equipCost[]" value="350">
-                                    </div>
-                                    <div class="col-sm-3 mb-2">
-                                        <input type="number" class="form-control" placeholder="Количество"
-                                          name="equipCount[]" value="5">
-                                    </div>
-                                    <div class="col-sm-2 mb-2">
-                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">
-                                            Удалить
-                                        </button>
+                                    <div class="mt-3">
+                                        <button type="button" class="btn btn-sm btn-info" id="applyInflation">Применить инфляцию к ценам</button>
+                                        <small class="text-muted ms-2">Желтым отмечен год, на который приходится халвинг</small>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Параметры отопления -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5>Параметры отопления</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <label for="heatingArea" class="col-sm-4 col-form-label">Отапливаемая площадь (м²)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" class="form-control" id="heatingArea" name="heatingArea"
-                                      value="200" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="heatingMonths" class="col-sm-4 col-form-label">Отопительный сезон (месяцев)</label>
-                                <div class="col-sm-8">
-                                    <input type="number" class="form-control" id="heatingMonths" name="heatingMonths"
-                                      value="7" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="standardHeatingCost" class="col-sm-4 col-form-label">
-                                    Стоимость обычного отопления ($/м²/месяц)
-                                </label>
-                                <div class="col-sm-8">
-                                    <input type="number" step="0.01" class="form-control" id="standardHeatingCost"
-                                      name="standardHeatingCost" value="1.2" required>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="heatUtilization" class="col-sm-4 col-form-label">
-                                    Процент утилизации тепла от майнеров (%)
-                                </label>
-                                <div class="col-sm-8">
-                                    <input type="number" step="1" min="0" max="100" class="form-control"
-                                      id="heatUtilization" name="heatUtilization" value="80" required>
+                            <!-- Кнопки управления -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <button type="button" class="btn btn-primary me-2" id="saveDataBtn">Сохранить данные</button>
+                                            <button type="button" class="btn btn-secondary" id="loadDataBtn">Загрузить данные</button>
+                                        </div>
+                                        <button type="button" class="btn btn-success" id="generateReportBtn">Сгенерировать отчет</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Кнопки управления -->
-                    <div class="d-flex justify-content-between mb-5">
-                        <div>
-                            <button type="button" class="btn btn-primary me-2" id="saveDataBtn">Сохранить данные</button>
-                            <button type="button" class="btn btn-secondary" id="loadDataBtn">Загрузить данные</button>
-                        </div>
-                        <button type="button" class="btn btn-success" id="generateReportBtn">Сгенерировать отчет</button>
                     </div>
                 </form>
             </div>
@@ -226,8 +342,11 @@
             <!-- Вкладка с отчетом -->
             <div class="tab-pane fade" id="report" role="tabpanel" aria-labelledby="report-tab">
                 <div class="d-flex justify-content-end mt-3">
-                    <button type="button" class="btn btn-outline-primary" id="copyMarkdownBtn">
+                    <button type="button" class="btn btn-outline-primary me-2" id="copyMarkdownBtn">
                         Скопировать Markdown
+                    </button>
+                    <button type="button" class="btn btn-outline-success" id="exportPdfBtn">
+                        Экспорт в PDF
                     </button>
                 </div>
                 <div class="preview mt-3" id="reportPreview">
@@ -240,44 +359,71 @@
     <!-- Подключаем необходимые JavaScript библиотеки -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Кнопка добавления оборудования
-            document.getElementById('addEquipmentBtn').addEventListener('click', function() {
-                const equipmentContainer = document.getElementById('additionalEquipment');
-                const newRow = document.createElement('div');
-                newRow.className = 'row equipment-row';
-                newRow.innerHTML = `
-                    <div class="col-sm-4 mb-2">
-                        <input type="text" class="form-control" placeholder="Название" name="equipName[]">
-                    </div>
-                    <div class="col-sm-3 mb-2">
-                        <input type="number" class="form-control" placeholder="Цена ($)" name="equipCost[]">
-                    </div>
-                    <div class="col-sm-3 mb-2">
-                        <input type="number" class="form-control" placeholder="Количество" name="equipCount[]" value="1">
-                    </div>
-                    <div class="col-sm-2 mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">Удалить</button>
-                    </div>
-                `;
-                equipmentContainer.appendChild(newRow);
+            // Функция для получения ежедневного вознаграждения BTC с учетом сложности и халвингов
+            function calculateDailyBtcReward(totalHashRate, year, difficultyGrowth) {
+                // Базовое вознаграждение на текущий момент (примерно)
+                let baseReward = 0.000001; // TH/s в день
 
-                // Добавляем обработчик для новой кнопки удаления
-                addRemoveEquipmentHandlers();
-            });
+                // Учитываем рост сложности сети с каждым годом
+                for (let i = 1; i < year; i++) {
+                    baseReward = baseReward * (1 - (difficultyGrowth[i-1] / 100));
+                }
 
-            // Обработчики для кнопок удаления оборудования
-            function addRemoveEquipmentHandlers() {
-                document.querySelectorAll('.remove-equip').forEach(button => {
-                    button.addEventListener('click', function() {
-                        this.closest('.equipment-row').remove();
-                    });
-                });
+                // Учитываем халвинг в 4-м году
+                if (year >= 4) {
+                    baseReward = baseReward / 2;
+                }
+
+                // Рассчитываем итоговое вознаграждение
+                return totalHashRate * baseReward;
             }
 
-            // Инициализируем обработчики для существующих кнопок
-            addRemoveEquipmentHandlers();
+            // Функция для форматирования чисел с разделителями тысяч
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+
+            // Пересчет кВт в Гкал
+            function kWToGcal(kW, hours) {
+                // 1 кВт·ч = 0.000860 Гкал
+                return kW * hours * 0.000860;
+            }
+
+            // Вспомогательная функция для получения значения из формы
+            function getFormValue(id, defaultValue = 0) {
+                const element = document.getElementById(id);
+                return element ? parseFloat(element.value) || defaultValue : defaultValue;
+            }
+
+            // Применение инфляции к ценам
+            document.getElementById('applyInflation').addEventListener('click', function() {
+                const inflationRate = getFormValue('defaultInflation', 10) / 100;
+
+                // Начальные значения из первого года
+                const baseBtcPrice = parseFloat(document.querySelector('input[name="btcPrice_1"]').value);
+                const baseGasPrice = parseFloat(document.querySelector('input[name="gasPrice_1"]').value);
+                const baseHeatPrice = parseFloat(document.querySelector('input[name="heatPrice_1"]').value);
+
+                // Применяем инфляцию к каждому году
+                for (let year = 2; year <= 7; year++) {
+                    // Цена биткоина (растет с инфляцией)
+                    document.querySelector(`input[name="btcPrice_${year}"]`).value =
+                        Math.round(baseBtcPrice * Math.pow(1 + inflationRate, year - 1));
+
+                    // Цена газа (растет с инфляцией)
+                    document.querySelector(`input[name="gasPrice_${year}"]`).value =
+                        (baseGasPrice * Math.pow(1 + inflationRate, year - 1)).toFixed(2);
+
+                    // Цена тепла (растет с инфляцией)
+                    document.querySelector(`input[name="heatPrice_${year}"]`).value =
+                        Math.round(baseHeatPrice * Math.pow(1 + inflationRate, year - 1));
+                }
+
+                alert('Цены на все 7 лет пересчитаны с учетом инфляции!');
+            });
 
             // Сохранение данных в localStorage
             document.getElementById('saveDataBtn').addEventListener('click', function() {
@@ -286,16 +432,7 @@
 
                 // Преобразуем FormData в объект
                 for (const [key, value] of formData.entries()) {
-                    if (key.endsWith('[]')) {
-                        // Обработка массивов для доп. оборудования
-                        const baseKey = key.slice(0, -2);
-                        if (!data[baseKey]) {
-                            data[baseKey] = [];
-                        }
-                        data[baseKey].push(value);
-                    } else {
-                        data[key] = value;
-                    }
+                    data[key] = value;
                 }
 
                 // Сохранение данных
@@ -309,48 +446,13 @@
                 if (savedData) {
                     const data = JSON.parse(savedData);
 
-                    // Заполняем обычные поля
+                    // Заполняем все поля формы
+                    const form = document.getElementById('projectDataForm');
                     for (const key in data) {
-                        if (!Array.isArray(data[key])) {
-                            const inputField = document.getElementById(key);
-                            if (inputField) {
-                                inputField.value = data[key];
-                            }
+                        const input = form.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            input.value = data[key];
                         }
-                    }
-
-                    // Обрабатываем дополнительное оборудование
-                    if (data.equipName && Array.isArray(data.equipName) && data.equipName.length > 0) {
-                        const equipmentContainer = document.getElementById('additionalEquipment');
-                        equipmentContainer.innerHTML = ''; // Очищаем текущие строки
-
-                        for (let i = 0; i < data.equipName.length; i++) {
-                            const newRow = document.createElement('div');
-                            newRow.className = 'row equipment-row';
-                            newRow.innerHTML = `
-                                <div class="col-sm-4 mb-2">
-                                    <input type="text" class="form-control" placeholder="Название"
-                                      name="equipName[]" value="${data.equipName[i] || ''}">
-                                </div>
-                                <div class="col-sm-3 mb-2">
-                                    <input type="number" class="form-control" placeholder="Цена ($)"
-                                      name="equipCost[]" value="${data.equipCost[i] || ''}">
-                                </div>
-                                <div class="col-sm-3 mb-2">
-                                    <input type="number" class="form-control" placeholder="Количество"
-                                      name="equipCount[]" value="${data.equipCount[i] || 1}">
-                                </div>
-                                <div class="col-sm-2 mb-2">
-                                    <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-equip">
-                                        Удалить
-                                    </button>
-                                </div>
-                            `;
-                            equipmentContainer.appendChild(newRow);
-                        }
-
-                        // Обновляем обработчики для кнопок удаления
-                        addRemoveEquipmentHandlers();
                     }
 
                     alert('Данные успешно загружены!');
@@ -361,154 +463,293 @@
 
             // Генерация отчета
             document.getElementById('generateReportBtn').addEventListener('click', function() {
-                const form = document.getElementById('projectDataForm');
-
                 // Собираем все данные формы
-                const formData = new FormData(form);
+                const formData = new FormData(document.getElementById('projectDataForm'));
                 const data = {};
 
                 for (const [key, value] of formData.entries()) {
-                    if (key.endsWith('[]')) {
-                        const baseKey = key.slice(0, -2);
-                        if (!data[baseKey]) {
-                            data[baseKey] = [];
-                        }
-                        data[baseKey].push(value);
-                    } else {
-                        data[key] = value;
-                    }
+                    data[key] = value;
                 }
 
-                // Парсим числовые значения
-                const projectName = data.projectName;
-                const bitcoinPrice = parseFloat(data.bitcoinPrice);
-                const electricityCost = parseFloat(data.electricityCost);
-                const minerModel = data.minerModel;
-                const hashRate = parseFloat(data.hashRate);
-                const minerPower = parseFloat(data.minerPower);
-                const minerCost = parseFloat(data.minerCost);
-                const minerCount = parseInt(data.minerCount);
-                const heatingArea = parseFloat(data.heatingArea);
-                const heatingMonths = parseInt(data.heatingMonths);
-                const standardHeatingCost = parseFloat(data.standardHeatingCost);
-                const heatUtilization = parseFloat(data.heatUtilization) / 100;
+                // Получаем базовые параметры
+                const generatorPower = parseFloat(data.generatorPower) || 2.2; // МВт
+                const generatorCost = parseFloat(data.generatorCost) || 75000000; // руб
+                const heatUtilizationCost = parseFloat(data.heatUtilizationCost) || 18859764; // руб
+                const chillerPower = parseFloat(data.chillerPower) || 2; // МВт
+                const chillerCost = parseFloat(data.chillerCost) || 75000000; // руб
+                const coolingTowersPower = parseFloat(data.coolingTowersPower) || 4.1; // МВт
+                const coolingTowersCost = parseFloat(data.coolingTowersCost) || 50000000; // руб
+                const controlSystemCost = parseFloat(data.controlSystemCost) || 15000000; // руб
 
-                // Расчеты для майнинга
-                const totalHashRate = hashRate * minerCount;
-                const dailyBtcReward = totalHashRate * 0.000001; // Примерная формула, нужно уточнить
-                const dailyBtcRevenue = dailyBtcReward * bitcoinPrice;
+                const minerModel = data.minerModel || 'S19 XP+ Hyd';
+                const hashRate = parseFloat(data.hashRate) || 279; // TH/s
+                const minerPower = parseFloat(data.minerPower) || 5301; // Вт
+                const minerCost = parseFloat(data.minerCost) || 301000; // руб
+                const minerCount = parseInt(data.minerCount) || 377; // шт
 
-                const totalPowerKW = (minerPower * minerCount) / 1000;
-                const dailyPowerKWh = totalPowerKW * 24;
-                const dailyElectricityCost = dailyPowerKWh * electricityCost;
+                const genEfficiencyElec = parseFloat(data.genEfficiencyElec) || 40; // %
+                const genEfficiencyHeat = parseFloat(data.genEfficiencyHeat) || 80; // %
+                const gasConsumption = parseFloat(data.gasConsumption) || 0.3; // м³/кВт·ч
+                const asicHeatRecovery = parseFloat(data.asicHeatRecovery) || 90; // %
+                const maintenancePercent = parseFloat(data.maintenancePercent) || 5; // %
+                const additionalTaxes = parseFloat(data.additionalTaxes) || 0; // руб
 
-                const dailyMiningProfit = dailyBtcRevenue - dailyElectricityCost;
-                const monthlyMiningProfit = dailyMiningProfit * 30;
-                const yearlyMiningProfit = dailyMiningProfit * 365;
+                // Получаем параметры по годам
+                const btcPrice = [];
+                const difficultyGrowth = [];
+                const gasPrice = [];
+                const heatPrice = [];
+                const utilizationRate = [];
 
-                // Стоимость оборудования
-                const totalMinerCost = minerCost * minerCount;
-                let totalAdditionalCost = 0;
-
-                // Считаем стоимость дополнительного оборудования
-                if (data.equipName && data.equipName.length > 0) {
-                    for (let i = 0; i < data.equipName.length; i++) {
-                        const cost = parseFloat(data.equipCost[i]) || 0;
-                        const count = parseInt(data.equipCount[i]) || 1;
-                        totalAdditionalCost += cost * count;
-                    }
+                for (let year = 1; year <= 7; year++) {
+                    btcPrice.push(parseFloat(data[`btcPrice_${year}`]) || 6000000);
+                    difficultyGrowth.push(parseFloat(data[`difficultyGrowth_${year}`]) || 5);
+                    gasPrice.push(parseFloat(data[`gasPrice_${year}`]) || 6.5);
+                    heatPrice.push(parseFloat(data[`heatPrice_${year}`]) || 2500);
+                    utilizationRate.push(parseFloat(data[`utilizationRate_${year}`]) || 95);
                 }
 
-                const totalEquipmentCost = totalMinerCost + totalAdditionalCost;
+                // Рассчитываем капитальные затраты
+                const miningFarmCost = minerCount * minerCost;
+                const totalCapex = generatorCost + miningFarmCost + heatUtilizationCost +
+                                   chillerCost + coolingTowersCost + controlSystemCost;
 
-                // Расчеты для отопления
-                const annualStandardHeatingCost = heatingArea * standardHeatingCost * heatingMonths;
-                const generatedHeatKW = totalPowerKW * heatUtilization;
-                const dailyHeatingValue = generatedHeatKW * 24 * electricityCost; // Стоимость генерируемого тепла
+                // Рассчитываем параметры системы
+                const generatorPowerKW = generatorPower * 1000; // кВт
+                const totalMinerPowerKW = (minerPower * minerCount) / 1000; // кВт
+                const totalHashRateTH = hashRate * minerCount; // TH/s
 
-                const heatingDays = heatingMonths * 30;
-                const annualHeatingValue = dailyHeatingValue * heatingDays;
+                // Рассчитываем амортизацию (линейная на 7 лет)
+                const yearlyDepreciation = totalCapex / 7;
+                const minerDepreciation = miningFarmCost / 7;
 
-                // Расчет окупаемости
-                const totalAnnualProfit = yearlyMiningProfit + annualHeatingValue;
-                const paybackDays = totalEquipmentCost / (totalAnnualProfit / 365);
-                const paybackMonths = paybackDays / 30;
-                const roi = (totalAnnualProfit / totalEquipmentCost) * 100;
+                // Массивы для хранения ежегодных показателей
+                const yearlyResults = [];
+
+                // Расчет для каждого года
+                for (let year = 1; year <= 7; year++) {
+                    const yearIndex = year - 1; // Индекс для массивов (0-6)
+
+                    // Количество рабочих часов в году с учетом коэффициента использования
+                    const hoursPerYear = 365 * 24 * (utilizationRate[yearIndex] / 100);
+
+                    // Расход газа
+                    const gasConsumptionYearly = generatorPowerKW * gasConsumption * hoursPerYear; // м³
+                    const gasCostYearly = gasConsumptionYearly * gasPrice[yearIndex]; // руб
+
+                    // Себестоимость электроэнергии
+                    const electricityCostPerKWh = gasPrice[yearIndex] * gasConsumption; // руб/кВт·ч
+
+                    // Производство электроэнергии
+                    const electricityProduction = generatorPowerKW * hoursPerYear; // кВт·ч
+
+                    // Доход от майнинга
+                    const dailyBtcReward = calculateDailyBtcReward(totalHashRateTH, year, difficultyGrowth);
+                    const yearlyBtcReward = dailyBtcReward * 365 * (utilizationRate[yearIndex] / 100);
+                    const miningRevenue = yearlyBtcReward * btcPrice[yearIndex]; // руб
+
+                    // Расчет тепла от генератора
+                    const genHeatKW = generatorPowerKW * ((genEfficiencyHeat - genEfficiencyElec) / 100); // кВт тепла
+                    const genHeatYearly = kWToGcal(genHeatKW, hoursPerYear); // Гкал в год
+
+                    // Расчет тепла от майнеров
+                    const minerHeatKW = totalMinerPowerKW * (asicHeatRecovery / 100); // кВт тепла
+                    const minerHeatYearly = kWToGcal(minerHeatKW, hoursPerYear); // Гкал в год
+
+                    // Общее количество тепла
+                    const totalHeatYearly = genHeatYearly + minerHeatYearly; // Гкал в год
+
+                    // Доход от реализации тепла
+                    const heatRevenue = totalHeatYearly * heatPrice[yearIndex]; // руб
+
+                    // Эксплуатационные расходы
+                    const maintenanceCost = totalCapex * (maintenancePercent / 100); // руб в год
+                    const operatingExpenses = gasCostYearly + maintenanceCost + additionalTaxes; // руб в год
+
+                    // Прибыль до вычета налогов, процентов и амортизации (EBITDA)
+                    const ebitda = miningRevenue + heatRevenue - operatingExpenses;
+
+                    // Прибыль до вычета налогов (EBT)
+                    const ebt = ebitda - yearlyDepreciation;
+
+                    // Расчет налога на майнинг (25% от прибыли майнинга после вычета расходов)
+                    // Расходы на майнинг: пропорциональная часть общих расходов + амортизация майнеров
+                    const miningExpenseShare = (totalMinerPowerKW / generatorPowerKW) * operatingExpenses;
+                    const miningProfit = miningRevenue - miningExpenseShare - minerDepreciation;
+                    const miningTax = Math.max(0, miningProfit * 0.25);
+
+                    // Чистая прибыль
+                    const netProfit = ebt - miningTax;
+
+                    // Сохраняем результаты года
+                    yearlyResults.push({
+                        year,
+                        utilizationRate: utilizationRate[yearIndex],
+                        hoursPerYear,
+                        btcPrice: btcPrice[yearIndex],
+                        difficultyGrowth: difficultyGrowth[yearIndex],
+                        gasPrice: gasPrice[yearIndex],
+                        heatPrice: heatPrice[yearIndex],
+                        gasConsumptionYearly,
+                        gasCostYearly,
+                        electricityCostPerKWh,
+                        electricityProduction,
+                        dailyBtcReward,
+                        yearlyBtcReward,
+                        miningRevenue,
+                        genHeatYearly,
+                        minerHeatYearly,
+                        totalHeatYearly,
+                        heatRevenue,
+                        maintenanceCost,
+                        operatingExpenses,
+                        ebitda,
+                        yearlyDepreciation,
+                        ebt,
+                        miningProfit,
+                        miningTax,
+                        netProfit
+                    });
+                }
 
                 // Формируем Markdown отчет
-                let markdown = `# ${projectName} - Бюджет проекта\n\n`;
-
-                markdown += `## Общая информация\n\n`;
+                let markdown = `# Bitcoin Heating Project - Финансовая модель\n\n`;
+                markdown += `## 1. Общая информация\n\n`;
                 markdown += `- **Дата расчета**: ${new Date().toLocaleDateString()}\n`;
-                markdown += `- **Цена Bitcoin**: $${bitcoinPrice.toFixed(2)}\n`;
-                markdown += `- **Стоимость электроэнергии**: $${electricityCost.toFixed(3)} за кВт·ч\n\n`;
-
-                markdown += `## Оборудование для майнинга\n\n`;
-                markdown += `- **Модель майнера**: ${minerModel}\n`;
+                markdown += `- **Модель ASIC майнера**: ${minerModel}\n`;
                 markdown += `- **Количество майнеров**: ${minerCount} шт.\n`;
+                markdown += `- **Мощность газопоршневого генератора**: ${generatorPower} МВт\n\n`;
+
+                markdown += `## 2. Капитальные затраты (CAPEX)\n\n`;
+                markdown += `| Компонент | Мощность/Количество | Стоимость (руб.) |\n`;
+                markdown += `|-----------|---------------------|------------------|\n`;
+                markdown += `| Газопоршневой генератор | ${generatorPower} МВт | ${formatNumber(generatorCost)} |\n`;
+                markdown += `| Майнинг-ферма | ${minerCount} ASIC-майнеров | ${formatNumber(miningFarmCost)} |\n`;
+                markdown += `| Система утилизации тепла | - | ${formatNumber(heatUtilizationCost)} |\n`;
+                markdown += `| Абсорбционный холодильник | ${chillerPower} МВт | ${formatNumber(chillerCost)} |\n`;
+                markdown += `| Градирни | ${coolingTowersPower} МВт | ${formatNumber(coolingTowersCost)} |\n`;
+                markdown += `| АСУ (автоматизированная система управления) | - | ${formatNumber(controlSystemCost)} |\n`;
+                markdown += `| **ИТОГО CAPEX** | | **${formatNumber(totalCapex)}** |\n\n`;
+
+                markdown += `## 3. Технические характеристики\n\n`;
+                markdown += `### 3.1 Параметры майнинга\n\n`;
+                markdown += `- **Модель майнера**: ${minerModel}\n`;
                 markdown += `- **Хешрейт одного майнера**: ${hashRate} TH/s\n`;
-                markdown += `- **Общий хешрейт**: ${totalHashRate} TH/s\n`;
+                markdown += `- **Общий хешрейт фермы**: ${formatNumber(totalHashRateTH)} TH/s\n`;
                 markdown += `- **Энергопотребление одного майнера**: ${minerPower} Вт\n`;
-                markdown += `- **Общее энергопотребление**: ${totalPowerKW.toFixed(2)} кВт\n\n`;
+                markdown += `- **Общее энергопотребление фермы**: ${formatNumber(totalMinerPowerKW)} кВт\n\n`;
 
-                markdown += `## Стоимость оборудования\n\n`;
-                markdown += `| Оборудование | Стоимость ($) | Количество | Общая стоимость ($) |\n`;
-                markdown += `|-------------|---------------|------------|--------------------|\n`;
-                markdown += `| ${minerModel} | ${minerCost.toFixed(2)} | ${minerCount} | ${totalMinerCost.toFixed(2)} |\n`;
+                markdown += `### 3.2 Параметры генератора и утилизации тепла\n\n`;
+                markdown += `- **Мощность генератора**: ${generatorPower} МВт\n`;
+                markdown += `- **КПД по электричеству**: ${genEfficiencyElec}%\n`;
+                markdown += `- **КПД по теплу**: ${genEfficiencyHeat}%\n`;
+                markdown += `- **Расход газа**: ${gasConsumption} м³/кВт·ч\n`;
+                markdown += `- **Утилизация тепла от асиков**: ${asicHeatRecovery}%\n`;
+                markdown += `- **Себестоимость электроэнергии (1-й год)**: ${(gasPrice[0] * gasConsumption).toFixed(2)} руб./кВт·ч\n\n`;
 
-                // Добавляем строки для дополнительного оборудования
-                if (data.equipName && data.equipName.length > 0) {
-                    for (let i = 0; i < data.equipName.length; i++) {
-                        const name = data.equipName[i];
-                        const cost = parseFloat(data.equipCost[i]) || 0;
-                        const count = parseInt(data.equipCount[i]) || 1;
-                        const totalCost = cost * count;
+                markdown += `## 4. Операционные показатели по годам\n\n`;
 
-                        markdown += `| ${name} | ${cost.toFixed(2)} | ${count} | ${totalCost.toFixed(2)} |\n`;
+                // Создаем таблицу с ежегодными показателями
+                markdown += `### 4.1 Базовые параметры\n\n`;
+                markdown += `| Показатель | ${yearlyResults.map(r => `Год ${r.year}`).join(' | ')} |\n`;
+                markdown += `|------------|${yearlyResults.map(() => '------').join('|')}|\n`;
+                markdown += `| Цена Bitcoin (руб.) | ${yearlyResults.map(r => formatNumber(r.btcPrice)).join(' | ')} |\n`;
+                markdown += `| Рост сложности майнинга (%) | ${yearlyResults.map(r => r.difficultyGrowth.toFixed(1)).join(' | ')} |\n`;
+                markdown += `| Цена газа (руб./м³) | ${yearlyResults.map(r => r.gasPrice.toFixed(2)).join(' | ')} |\n`;
+                markdown += `| Цена тепла (руб./Гкал) | ${yearlyResults.map(r => formatNumber(r.heatPrice)).join(' | ')} |\n`;
+                markdown += `| Коэффициент использования (%) | ${yearlyResults.map(r => r.utilizationRate.toFixed(1)).join(' | ')} |\n`;
+                markdown += `| Себестоимость электроэнергии (руб./кВт·ч) | ${yearlyResults.map(r => r.electricityCostPerKWh.toFixed(2)).join(' | ')} |\n\n`;
+
+                markdown += `### 4.2 Производство и потребление\n\n`;
+                markdown += `| Показатель | ${yearlyResults.map(r => `Год ${r.year}`).join(' | ')} |\n`;
+                markdown += `|------------|${yearlyResults.map(() => '------').join('|')}|\n`;
+                markdown += `| Производство электроэнергии (МВт·ч) | ${yearlyResults.map(r => formatNumber(Math.round(r.electricityProduction / 1000))).join(' | ')} |\n`;
+                markdown += `| Расход газа (тыс. м³) | ${yearlyResults.map(r => formatNumber(Math.round(r.gasConsumptionYearly / 1000))).join(' | ')} |\n`;
+                markdown += `| Добыча Bitcoin в день (BTC) | ${yearlyResults.map(r => r.dailyBtcReward.toFixed(8)).join(' | ')} |\n`;
+                markdown += `| Добыча Bitcoin за год (BTC) | ${yearlyResults.map(r => r.yearlyBtcReward.toFixed(6)).join(' | ')} |\n`;
+                markdown += `| Производство тепла от генератора (Гкал) | ${yearlyResults.map(r => formatNumber(Math.round(r.genHeatYearly))).join(' | ')} |\n`;
+                markdown += `| Производство тепла от майнеров (Гкал) | ${yearlyResults.map(r => formatNumber(Math.round(r.minerHeatYearly))).join(' | ')} |\n`;
+                markdown += `| Общее производство тепла (Гкал) | ${yearlyResults.map(r => formatNumber(Math.round(r.totalHeatYearly))).join(' | ')} |\n\n`;
+
+                markdown += `### 4.3 Финансовые показатели (тыс. руб.)\n\n`;
+                markdown += `| Показатель | ${yearlyResults.map(r => `Год ${r.year}`).join(' | ')} |\n`;
+                markdown += `|------------|${yearlyResults.map(() => '------').join('|')}|\n`;
+                markdown += `| Доход от майнинга | ${yearlyResults.map(r => formatNumber(Math.round(r.miningRevenue / 1000))).join(' | ')} |\n`;
+                markdown += `| Доход от реализации тепла | ${yearlyResults.map(r => formatNumber(Math.round(r.heatRevenue / 1000))).join(' | ')} |\n`;
+                markdown += `| Затраты на газ | ${yearlyResults.map(r => formatNumber(Math.round(r.gasCostYearly / 1000))).join(' | ')} |\n`;
+                markdown += `| Затраты на обслуживание | ${yearlyResults.map(r => formatNumber(Math.round(r.maintenanceCost / 1000))).join(' | ')} |\n`;
+                markdown += `| Операционные расходы (всего) | ${yearlyResults.map(r => formatNumber(Math.round(r.operatingExpenses / 1000))).join(' | ')} |\n`;
+                markdown += `| EBITDA | ${yearlyResults.map(r => formatNumber(Math.round(r.ebitda / 1000))).join(' | ')} |\n`;
+                markdown += `| Амортизация | ${yearlyResults.map(r => formatNumber(Math.round(r.yearlyDepreciation / 1000))).join(' | ')} |\n`;
+                markdown += `| Прибыль до налогообложения | ${yearlyResults.map(r => formatNumber(Math.round(r.ebt / 1000))).join(' | ')} |\n`;
+                markdown += `| Налог на майнинг (25%) | ${yearlyResults.map(r => formatNumber(Math.round(r.miningTax / 1000))).join(' | ')} |\n`;
+                markdown += `| Чистая прибыль | ${yearlyResults.map(r => formatNumber(Math.round(r.netProfit / 1000))).join(' | ')} |\n\n`;
+
+                // Расчет накопленной чистой прибыли и срока окупаемости
+                let cumulativeProfit = 0;
+                let paybackYear = 0;
+                let paybackMonth = 0;
+
+                for (let i = 0; i < yearlyResults.length; i++) {
+                    cumulativeProfit += yearlyResults[i].netProfit;
+
+                    if (cumulativeProfit >= totalCapex && paybackYear === 0) {
+                        paybackYear = i + 1;
+
+                        // Расчет месяцев
+                        const previousYearCumulative = cumulativeProfit - yearlyResults[i].netProfit;
+                        const remainingToPayback = totalCapex - previousYearCumulative;
+                        const monthlyProfit = yearlyResults[i].netProfit / 12;
+                        paybackMonth = Math.ceil(remainingToPayback / monthlyProfit);
+
+                        if (paybackMonth > 12) {
+                            paybackYear++;
+                            paybackMonth = paybackMonth - 12;
+                        }
                     }
                 }
 
-                markdown += `| **ИТОГО** | | | **${totalEquipmentCost.toFixed(2)}** |\n\n`;
+                // Расчет IRR (простое приближение)
+                const totalProfit = yearlyResults.reduce((sum, year) => sum + year.netProfit, 0);
+                const avgYearlyProfit = totalProfit / 7;
+                const simpleROI = (avgYearlyProfit / totalCapex) * 100;
 
-                markdown += `## Прибыльность майнинга\n\n`;
-                markdown += `- **Ежедневная добыча Bitcoin**: ${dailyBtcReward.toFixed(8)} BTC\n`;
-                markdown += `- **Ежедневный доход от майнинга**: $${dailyBtcRevenue.toFixed(2)}\n`;
-                markdown += `- **Ежедневные затраты на электроэнергию**: $${dailyElectricityCost.toFixed(2)}\n`;
-                markdown += `- **Ежедневная чистая прибыль от майнинга**: $${dailyMiningProfit.toFixed(2)}\n`;
-                markdown += `- **Ежемесячная чистая прибыль от майнинга**: $${monthlyMiningProfit.toFixed(2)}\n`;
-                markdown += `- **Годовая чистая прибыль от майнинга**: $${yearlyMiningProfit.toFixed(2)}\n\n`;
+                markdown += `## 5. Показатели эффективности проекта\n\n`;
+                markdown += `- **Общие капитальные затраты**: ${formatNumber(totalCapex)} руб.\n`;
+                markdown += `- **Суммарная чистая прибыль за 7 лет**: ${formatNumber(Math.round(totalProfit))} руб.\n`;
 
-                markdown += `## Отопление помещения\n\n`;
-                markdown += `- **Отапливаемая площадь**: ${heatingArea} м²\n`;
-                markdown += `- **Продолжительность отопительного сезона**: ${heatingMonths} месяцев\n`;
-                markdown += `- **Стоимость стандартного отопления**: $${standardHeatingCost.toFixed(2)} за м² в месяц\n`;
-                markdown += `- **Годовая стоимость стандартного отопления**: $${annualStandardHeatingCost.toFixed(2)}\n`;
-                markdown += `- **Утилизация тепла от майнеров**: ${heatUtilization * 100}%\n`;
-                markdown += `- **Генерируемая тепловая мощность**: ${generatedHeatKW.toFixed(2)} кВт\n`;
-                markdown += `- **Ежедневная экономия на отоплении**: $${dailyHeatingValue.toFixed(2)}\n`;
-                markdown += `- **Годовая экономия на отоплении**: $${annualHeatingValue.toFixed(2)}\n\n`;
-
-                markdown += `## Окупаемость проекта\n\n`;
-                markdown += `- **Общая годовая прибыль**: $${totalAnnualProfit.toFixed(2)}\n`;
-                markdown += `- **Срок окупаемости**: ${Math.round(paybackDays)} дней (${paybackMonths.toFixed(1)} месяцев)\n`;
-                markdown += `- **Рентабельность инвестиций (ROI)**: ${roi.toFixed(2)}%\n\n`;
-
-                // Примечания и выводы
-                markdown += `## Примечания\n\n`;
-                markdown += `- Расчеты основаны на текущей цене Bitcoin и могут изменяться в зависимости от рыночных условий.\n`;
-                markdown += `- Не учтены затраты на техническое обслуживание и возможные простои оборудования.\n`;
-                markdown += `- Экономия на отоплении рассчитана исходя из утилизации тепла майнеров в течение отопительного сезона.\n`;
-                markdown += `- В расчете не учтена инфляция и изменение сложности майнинга Bitcoin.\n\n`;
-
-                markdown += `## Вывод\n\n`;
-                if (paybackMonths <= 12) {
-                    markdown += `Проект имеет хорошую окупаемость в течение ${paybackMonths.toFixed(1)} месяцев. `;
-                    markdown += `Использование тепла от майнинга для отопления помещения позволяет `;
-                    markdown += `существенно повысить общую эффективность проекта и снизить срок окупаемости.`;
+                if (paybackYear > 0) {
+                    markdown += `- **Срок окупаемости**: ${paybackYear} лет ${paybackMonth} месяцев\n`;
                 } else {
-                    markdown += `Проект имеет срок окупаемости ${paybackMonths.toFixed(1)} месяцев, что превышает 1 год. `;
-                    markdown += `Рекомендуется рассмотреть возможность оптимизации затрат или `;
-                    markdown += `увеличения эффективности использования тепла.`;
+                    markdown += `- **Срок окупаемости**: более 7 лет\n`;
+                }
+
+                markdown += `- **Средняя годовая рентабельность инвестиций**: ${simpleROI.toFixed(2)}%\n\n`;
+
+                markdown += `## 6. Анализ рисков\n\n`;
+                markdown += `### Ключевые риски проекта:\n\n`;
+                markdown += `1. **Волатильность цены Bitcoin** - значительное падение стоимости криптовалюты может существенно снизить доходность проекта.\n`;
+                markdown += `2. **Рост сложности майнинга** - более быстрый рост сложности, чем прогнозируется, приведет к снижению добычи Bitcoin.\n`;
+                markdown += `3. **Изменение регуляторной среды** - ужесточение законодательства в отношении майнинга или повышение налоговой нагрузки.\n`;
+                markdown += `4. **Рост цен на газ** - повышение стоимости газа выше прогнозных значений увеличит операционные расходы.\n`;
+                markdown += `5. **Технологические риски** - выход из строя оборудования, снижение эффективности утилизации тепла.\n\n`;
+
+                markdown += `### Меры по снижению рисков:\n\n`;
+                markdown += `1. Хеджирование риска волатильности цены Bitcoin через финансовые инструменты.\n`;
+                markdown += `2. Регулярное обновление майнингового оборудования для поддержания конкурентоспособности.\n`;
+                markdown += `3. Заключение долгосрочных контрактов на поставку газа по фиксированной цене.\n`;
+                markdown += `4. Диверсификация бизнеса за счет максимизации дохода от реализации тепла.\n`;
+                markdown += `5. Комплексная система мониторинга и профилактического обслуживания оборудования.\n\n`;
+
+                // Формируем заключение
+                markdown += `## 7. Заключение\n\n`;
+
+                if (paybackYear <= 4) {
+                    markdown += `Проект Bitcoin Heating демонстрирует высокую эффективность с периодом окупаемости ${paybackYear} лет ${paybackMonth} месяцев и средней годовой рентабельностью ${simpleROI.toFixed(2)}%. Комбинирование майнинга криптовалюты с утилизацией тепла позволяет достичь синергетического эффекта и снизить зависимость от волатильности рынка криптовалют. Проект рекомендуется к реализации.`;
+                } else if (paybackYear <= 6) {
+                    markdown += `Проект Bitcoin Heating имеет умеренную эффективность с периодом окупаемости ${paybackYear} лет ${paybackMonth} месяцев и средней годовой рентабельностью ${simpleROI.toFixed(2)}%. Несмотря на длительный срок окупаемости, проект обеспечивает стабильный денежный поток и имеет потенциал для улучшения показателей при благоприятном изменении рыночных условий. Проект может быть рекомендован к реализации при наличии долгосрочной инвестиционной стратегии.`;
+                } else {
+                    markdown += `Проект Bitcoin Heating демонстрирует длительный срок окупаемости (более 7 лет) и среднюю годовую рентабельность ${simpleROI.toFixed(2)}%. Рекомендуется пересмотреть ключевые параметры проекта для улучшения экономических показателей, либо рассмотреть альтернативные варианты инвестирования с более высокой доходностью и меньшим сроком окупаемости.`;
                 }
 
                 // Сохраняем сгенерированный отчет
@@ -531,6 +772,31 @@
                 } else {
                     alert('Сначала сгенерируйте отчет!');
                 }
+            });
+
+            // Экспорт в PDF
+            document.getElementById('exportPdfBtn').addEventListener('click', function() {
+                const element = document.getElementById('reportPreview');
+                if (element.textContent.trim() === 'Отчет будет отображен здесь после генерации') {
+                    alert('Сначала сгенерируйте отчет!');
+                    return;
+                }
+
+                // Создаем клон элемента для экспорта с улучшенными стилями
+                const pdfElement = element.cloneNode(true);
+                pdfElement.style.padding = '20px';
+                pdfElement.style.fontSize = '12pt';
+                pdfElement.style.lineHeight = '1.5';
+
+                const opt = {
+                    margin: [10, 10, 10, 10],
+                    filename: 'Bitcoin_Heating_Project_Report.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(pdfElement).save();
             });
         });
     </script>
