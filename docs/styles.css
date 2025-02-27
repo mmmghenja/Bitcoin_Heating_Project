@@ -1,0 +1,108 @@
+.card {
+    margin-bottom: 20px;
+}
+.section-header {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.table-sm td, .table-sm th {
+    padding: 0.25rem;
+}
+.halving-year {
+    background-color: rgba(255, 215, 0, 0.2) !important;
+}
+.preview {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #f9f9fa;
+    overflow-x: auto;
+}
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1000;
+    border-bottom: 1px solid #dee2e6;
+}
+.custom-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+.custom-tooltip .tooltip-text {
+    visibility: hidden;
+    width: 300px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -150px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.custom-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+.input-group-text {
+    min-width: 40px;
+}
+
+/* Добавленные стили для мобильных устройств */
+.table-responsive {
+    overflow-x: auto;
+    position: relative;
+}
+
+/* Делаем поля ввода больше на мобильных */
+@media (max-width: 768px) {
+    .form-control, .btn {
+        font-size: 16px;
+        padding: 10px 12px;
+        height: auto;
+    }
+    .form-control-sm {
+        padding: 6px 8px;
+        font-size: 14px;
+    }
+    .custom-tooltip .tooltip-text {
+        width: 200px;
+        margin-left: -100px;
+    }
+    .sticky-year-column {
+        position: sticky;
+        left: 0;
+        background-color: white;
+        z-index: 2;
+        border-right: 2px solid #dee2e6;
+    }
+    .table-wrapper {
+        overflow-x: auto;
+        position: relative;
+    }
+    .year-toggle-btn {
+        display: block;
+        margin: 10px 0;
+    }
+    /* Адаптируем метки полей */
+    .col-form-label {
+        font-size: 14px;
+    }
+    /* Уменьшаем padding на карточках */
+    .card-body {
+        padding: 0.75rem;
+    }
+    /* Улучшаем отступы в формах */
+    .row.mb-3 {
+        margin-bottom: 0.5rem !important;
+    }
+}
