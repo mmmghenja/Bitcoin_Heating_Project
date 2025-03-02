@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функция для получения ежедневного вознаграждения BTC с учетом сложности и халвингов
     function calculateDailyBtcReward(totalHashRate, year, difficultyGrowth) {
         // Базовое вознаграждение на текущий момент (примерно)
-        let baseReward = 0.000000466; // TH/s в день
+        let baseReward = 0.000157818; // TH/s в день
 
         // Учитываем рост сложности сети с каждым годом
         for (let i = 1; i < year; i++) {
