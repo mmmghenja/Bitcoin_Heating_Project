@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const miningRevenue = yearlyBtcReward * btcPrice[yearIndex]; // руб
 
             // Расчет тепла от генератора
-            const genHeatKW = generatorPowerKW * ((genEfficiencyHeat - genEfficiencyElec) / 100); // кВт тепла
+            const genHeatKW = generatorPowerKW * (genEfficiencyHeat / genEfficiencyElec); // кВт тепла
             const genHeatYearly = kWToGcal(genHeatKW, hoursPerYear); // Гкал в год
 
             // Расчет тепла от майнеров
