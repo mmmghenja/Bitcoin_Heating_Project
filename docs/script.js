@@ -218,6 +218,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const coolingTowersPower = parseFloat(data.coolingTowersPower) || 4.6; // МВт
         const coolingTowersCost = parseFloat(data.coolingTowersCost) || 50000000; // руб
         const controlSystemCost = parseFloat(data.controlSystemCost) || 15000000; // руб
+        // Get building parameters
+        const buildingArea = parseFloat(data.buildingArea) || 300; // м²
+        const buildingCostPerMeter = parseFloat(data.buildingCostPerMeter) || 45000; // руб./м²
+        const buildingCost = buildingArea * buildingCostPerMeter; // руб.
 
         // Начальные параметры ASIC
         let minerModel = data.minerModel || 'S19 XP+ Hyd';
@@ -255,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Рассчитываем исходные капитальные затраты
         const initialMiningFarmCost = minerCount * minerCost;
         const initialCapex = generatorCost + initialMiningFarmCost + heatUtilizationCost +
-                           chillerCost + coolingTowersCost + controlSystemCost;
+                           chillerCost + coolingTowersCost + controlSystemCost + buildingCost;
 
         // Рассчитываем параметры системы
         const generatorPowerKW = generatorPower * 1000; // кВт
@@ -467,6 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
         markdown += `| Абсорбционный холодильник | ${chillerPower} МВт | ${formatNumber(chillerCost)} |\n`;
         markdown += `| Градирни | ${coolingTowersPower} МВт | ${formatNumber(coolingTowersCost)} |\n`;
         markdown += `| АСУ (автоматизированная система управления) | - | ${formatNumber(controlSystemCost)} |\n`;
+        markdown += `| Здание | ${buildingArea} м² | ${formatNumber(buildingCost)} |\n`;
         markdown += `| **ИТОГО первоначальные CAPEX** | | **${formatNumber(initialCapex)}** |\n\n`;
 
         // Затраты на обновление ASIC
