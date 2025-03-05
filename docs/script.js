@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Учитываем рост сложности сети с каждым годом
         for (let i = 1; i < year; i++) {
-            baseReward = baseReward * (1 - (difficultyGrowth[i-1] / 100));
+            baseReward /= (1 + (difficultyGrowth[i-1] / 100));
         }
 
         // Учитываем халвинги
