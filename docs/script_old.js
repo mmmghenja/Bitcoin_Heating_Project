@@ -82,23 +82,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Функция для получения ежедневного вознаграждения BTC с учетом сложности и халвингов
-    function calculateDailyBtcReward(totalHashRate, year, difficultyGrowth, asicEfficiency) {
+    function calculateDailyBtcReward(totalHashRate, year, difficultyGrowth) {
         // Базовое вознаграждение на текущий момент (примерно)
         let baseReward = 0.000000566; // TH/s в день
-
-        // Применяем коэффициент эффективности ASIC (по умолчанию 1 для первой генерации)
-        baseReward = baseReward * asicEfficiency;
 
         // Учитываем рост сложности сети с каждым годом
         for (let i = 1; i < year; i++) {
             baseReward = baseReward * (1 - (difficultyGrowth[i-1] / 100));
         }
 
-        // Учитываем халвинги
-        if (year >= 3 && year < 7) {
-            baseReward = baseReward / 2; // Первый халвинг
-        } else if (year >= 7) {
-            baseReward = baseReward / 4; // Второй халвинг
+        // Учитываем халвинг в 4-м году
+        if (year >= 4) {
+            baseReward = baseReward / 2;
         }
 
         // Рассчитываем итоговое вознаграждение
@@ -122,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return element ? parseFloat(element.value) || defaultValue : defaultValue;
     }
 
-    // Обновленная функция для применения инфляции к цене на 9 лет
+    // Применение инфляции к ценам
     document.getElementById('applyInflation').addEventListener('click', function() {
         const inflationRate = getFormValue('defaultInflation', 10) / 100;
 
@@ -132,24 +127,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const baseHeatPrice = parseFloat(document.querySelector('input[name="heatPrice_1"]').value);
 
         // Применяем инфляцию к каждому году
-        for (let year = 2; year <= 9; year++) {
-            // Если год халвинга, увеличиваем цену Bitcoin более значительно
-            let btcMultiplier = Math.pow(1 + inflationRate, year - 1);
-
-            // Дополнительный множитель для цены Bitcoin после халвинга
-            if (year === 3) {
-                btcMultiplier *= 1.4; // Первый халвинг
-            } else if (year >= 4 && year < 7) {
-                btcMultiplier *= 1.4; // После первого халвинга
-            } else if (year === 7) {
-                btcMultiplier *= 1.4 * 1.4; // Второй халвинг
-            } else if (year >= 7) {
-                btcMultiplier *= 1.4 * 1.4; // После второго халвинга
-            }
-
-            // Цена биткоина
+        for (let year = 2; year <= 7; year++) {
+            // Цена биткоина (растет с инфляцией)
             document.querySelector(`input[name="btcPrice_${year}"]`).value =
-                Math.round(baseBtcPrice * btcMultiplier);
+                Math.round(baseBtcPrice * Math.pow(1 + inflationRate, year - 1));
 
             // Цена газа (растет с инфляцией)
             document.querySelector(`input[name="gasPrice_${year}"]`).value =
@@ -160,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 Math.round(baseHeatPrice * Math.pow(1 + inflationRate, year - 1));
         }
 
-        alert('Цены на все 9 лет пересчитаны с учетом инфляции!');
+        alert('Цены на все 7 лет пересчитаны с учетом инфляции!');
     });
 
     // Сохранение данных в localStorage
@@ -213,25 +194,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const generatorPower = parseFloat(data.generatorPower) || 2.2; // МВт
         const generatorCost = parseFloat(data.generatorCost) || 75000000; // руб
         const heatUtilizationCost = parseFloat(data.heatUtilizationCost) || 18859764; // руб
-        const chillerPower = parseFloat(data.chillerPower) || 0.1; // МВт
-        const chillerCost = parseFloat(data.chillerCost) || 3750000; // руб
-        const coolingTowersPower = parseFloat(data.coolingTowersPower) || 4.6; // МВт
+        const chillerPower = parseFloat(data.chillerPower) || 2; // МВт
+        const chillerCost = parseFloat(data.chillerCost) || 75000000; // руб
+        const coolingTowersPower = parseFloat(data.coolingTowersPower) || 4.1; // МВт
         const coolingTowersCost = parseFloat(data.coolingTowersCost) || 50000000; // руб
         const controlSystemCost = parseFloat(data.controlSystemCost) || 15000000; // руб
 
-        // Начальные параметры ASIC
-        let minerModel = data.minerModel || 'S19 XP+ Hyd';
-        let hashRate = parseFloat(data.hashRate) || 279; // TH/s
+        const minerModel = data.minerModel || 'S19 XP+ Hyd';
+        const hashRate = parseFloat(data.hashRate) || 279; // TH/s
         const minerPower = parseFloat(data.minerPower) || 5301; // Вт
-        let minerCost = parseFloat(data.minerCost) || 301000; // руб
-        let minerCount = parseInt(data.minerCount) || 377; // шт
-
-        // Параметры обновления ASIC
-        const asicPerformanceIncrease = parseFloat(data.asicPerformanceIncrease) || 68; // %
-        const asicCostIncrease = parseFloat(data.asicCostIncrease) || 56; // %
+        const minerCost = parseFloat(data.minerCost) || 301000; // руб
+        const minerCount = parseInt(data.minerCount) || 377; // шт
 
         const genEfficiencyElec = parseFloat(data.genEfficiencyElec) || 40; // %
-        const genEfficiencyHeat = parseFloat(data.genEfficiencyHeat) || 40; // %
+        const genEfficiencyHeat = parseFloat(data.genEfficiencyHeat) || 80; // %
         const gasConsumption = parseFloat(data.gasConsumption) || 0.3; // м³/кВт·ч
         const asicHeatRecovery = parseFloat(data.asicHeatRecovery) || 90; // %
         const maintenancePercent = parseFloat(data.maintenancePercent) || 5; // %
@@ -244,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const heatPrice = [];
         const utilizationRate = [];
 
-        for (let year = 1; year <= 9; year++) {
+        for (let year = 1; year <= 7; year++) {
             btcPrice.push(parseFloat(data[`btcPrice_${year}`]) || 6000000);
             difficultyGrowth.push(parseFloat(data[`difficultyGrowth_${year}`]) || 5);
             gasPrice.push(parseFloat(data[`gasPrice_${year}`]) || 6.5);
@@ -252,110 +228,26 @@ document.addEventListener('DOMContentLoaded', function() {
             utilizationRate.push(parseFloat(data[`utilizationRate_${year}`]) || 95);
         }
 
-        // Рассчитываем исходные капитальные затраты
-        const initialMiningFarmCost = minerCount * minerCost;
-        const initialCapex = generatorCost + initialMiningFarmCost + heatUtilizationCost +
+        // Рассчитываем капитальные затраты
+        const miningFarmCost = minerCount * minerCost;
+        const totalCapex = generatorCost + miningFarmCost + heatUtilizationCost +
                            chillerCost + coolingTowersCost + controlSystemCost;
 
         // Рассчитываем параметры системы
         const generatorPowerKW = generatorPower * 1000; // кВт
         const totalMinerPowerKW = (minerPower * minerCount) / 1000; // кВт
+        const totalHashRateTH = hashRate * minerCount; // TH/s
 
-        // Рассчитываем амортизацию (линейная на 9 лет для всего, кроме майнеров)
-        const infrastructureCapex = generatorCost + heatUtilizationCost + chillerCost +
-                                  coolingTowersCost + controlSystemCost;
-        const yearlyInfrastructureDepreciation = infrastructureCapex / 9;
+        // Рассчитываем амортизацию (линейная на 7 лет)
+        const yearlyDepreciation = totalCapex / 7;
+        const minerDepreciation = miningFarmCost / 7;
 
         // Массивы для хранения ежегодных показателей
         const yearlyResults = [];
 
-        // Массивы для хранения информации о поколениях ASIC
-        const asicGenerations = [
-            {
-                generation: 1,
-                model: minerModel,
-                hashRate: hashRate,
-                cost: minerCost,
-                count: minerCount,
-                efficiencyMultiplier: 1.0
-            }
-        ];
-
-        // Текущее поколение ASIC для каждого года
-        const yearToAsicGeneration = {};
-
-        // Расходы на обновление ASIC в каждом году
-        const asicUpgradeCosts = Array(9).fill(0);
-
-        // Общие капитальные затраты с учетом обновлений ASIC
-        let totalCapex = initialCapex;
-
-        // Определяем поколения ASIC и расходы на обновление
-        for (let year = 1; year <= 9; year++) {
-            if (year < 3) {
-                // Первые 2 года - первое поколение
-                yearToAsicGeneration[year] = 0; // Индекс в массиве asicGenerations
-            } else if (year === 3) {
-                // 3-й год - обновление до второго поколения ASIC
-                const gen2HashRate = hashRate * (1 + asicPerformanceIncrease / 100);
-                const gen2Cost = minerCost * (1 + asicCostIncrease / 100);
-
-                asicGenerations.push({
-                    generation: 2,
-                    model: `${minerModel} Gen2`,
-                    hashRate: gen2HashRate,
-                    cost: gen2Cost,
-                    count: minerCount,
-                    efficiencyMultiplier: 1 + (asicPerformanceIncrease / 100)
-                });
-
-                yearToAsicGeneration[year] = 1; // Индекс второго поколения
-
-                // Стоимость обновления - полная замена всех ASIC
-                asicUpgradeCosts[year-1] = minerCount * gen2Cost;
-                totalCapex += asicUpgradeCosts[year-1];
-            } else if (year < 7) {
-                // Годы 4-6 - второе поколение
-                yearToAsicGeneration[year] = 1; // Индекс второго поколения
-            } else if (year === 7) {
-                // 7-й год - обновление до третьего поколения ASIC
-                const gen2HashRate = asicGenerations[1].hashRate;
-                const gen2Cost = asicGenerations[1].cost;
-
-                const gen3HashRate = gen2HashRate * (1 + asicPerformanceIncrease / 100);
-                const gen3Cost = gen2Cost * (1 + asicCostIncrease / 100);
-
-                asicGenerations.push({
-                    generation: 3,
-                    model: `${minerModel} Gen3`,
-                    hashRate: gen3HashRate,
-                    cost: gen3Cost,
-                    count: minerCount,
-                    efficiencyMultiplier: asicGenerations[1].efficiencyMultiplier * (1 + (asicPerformanceIncrease / 100))
-                });
-
-                yearToAsicGeneration[year] = 2; // Индекс третьего поколения
-
-                // Стоимость обновления - полная замена всех ASIC
-                asicUpgradeCosts[year-1] = minerCount * gen3Cost;
-                totalCapex += asicUpgradeCosts[year-1];
-            } else {
-                // Годы 8-9 - третье поколение
-                yearToAsicGeneration[year] = 2; // Индекс третьего поколения
-            }
-        }
-
         // Расчет для каждого года
-        for (let year = 1; year <= 9; year++) {
-            const yearIndex = year - 1; // Индекс для массивов (0-8)
-
-            // Получаем текущие параметры ASIC
-            const currentAsicGeneration = yearToAsicGeneration[year];
-            const currentAsic = asicGenerations[currentAsicGeneration];
-            const currentHashRate = currentAsic.hashRate;
-            const currentMinerCost = currentAsic.cost;
-            const totalHashRateTH = currentHashRate * minerCount; // TH/s
-            const asicEfficiency = currentAsic.efficiencyMultiplier;
+        for (let year = 1; year <= 7; year++) {
+            const yearIndex = year - 1; // Индекс для массивов (0-6)
 
             // Количество рабочих часов в году с учетом коэффициента использования
             const hoursPerYear = 365 * 24 * (utilizationRate[yearIndex] / 100);
@@ -371,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const electricityProduction = generatorPowerKW * hoursPerYear; // кВт·ч
 
             // Доход от майнинга
-            const dailyBtcReward = calculateDailyBtcReward(totalHashRateTH, year, difficultyGrowth, asicEfficiency);
+            const dailyBtcReward = calculateDailyBtcReward(totalHashRateTH, year, difficultyGrowth);
             const yearlyBtcReward = dailyBtcReward * 365 * (utilizationRate[yearIndex] / 100);
             const miningRevenue = yearlyBtcReward * btcPrice[yearIndex]; // руб
 
@@ -389,24 +281,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // Доход от реализации тепла
             const heatRevenue = totalHeatYearly * heatPrice[yearIndex]; // руб
 
-            // Эксплуатационные расходы без учета обновления ASIC
-            const maintenanceCost = infrastructureCapex * (maintenancePercent / 100); // руб в год
+            // Эксплуатационные расходы
+            const maintenanceCost = totalCapex * (maintenancePercent / 100); // руб в год
             const operatingExpenses = gasCostYearly + maintenanceCost + additionalTaxes; // руб в год
-
-            // Расходы на обновление ASIC в текущем году
-            const currentYearAsicUpgrade = asicUpgradeCosts[yearIndex];
 
             // Прибыль до вычета налогов, процентов и амортизации (EBITDA)
             const ebitda = miningRevenue + heatRevenue - operatingExpenses;
 
             // Прибыль до вычета налогов (EBT)
-            // Амортизация только для инфраструктуры, ASIC списываются при обновлении
-            const ebt = ebitda - yearlyInfrastructureDepreciation - currentYearAsicUpgrade;
+            const ebt = ebitda - yearlyDepreciation;
 
             // Расчет налога на майнинг (25% от прибыли майнинга после вычета расходов)
-            // Расходы на майнинг: пропорциональная часть общих расходов + затраты на обновление ASIC
+            // Расходы на майнинг: пропорциональная часть общих расходов + амортизация майнеров
             const miningExpenseShare = (totalMinerPowerKW / generatorPowerKW) * operatingExpenses;
-            const miningProfit = miningRevenue - miningExpenseShare - currentYearAsicUpgrade;
+            const miningProfit = miningRevenue - miningExpenseShare - minerDepreciation;
             const miningTax = Math.max(0, miningProfit * 0.25);
 
             // Чистая прибыль
@@ -434,13 +322,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 heatRevenue,
                 maintenanceCost,
                 operatingExpenses,
-                asicGeneration: currentAsic.generation,
-                asicModel: currentAsic.model,
-                asicHashRate: currentHashRate,
-                asicCost: currentMinerCost,
-                asicUpgradeCost: currentYearAsicUpgrade,
                 ebitda,
-                yearlyDepreciation: yearlyInfrastructureDepreciation,
+                yearlyDepreciation,
                 ebt,
                 miningProfit,
                 miningTax,
@@ -454,57 +337,28 @@ document.addEventListener('DOMContentLoaded', function() {
         markdown += `- **Дата расчета**: ${new Date().toLocaleDateString()}\n`;
         markdown += `- **Модель ASIC майнера**: ${minerModel}\n`;
         markdown += `- **Количество майнеров**: ${minerCount} шт.\n`;
-        markdown += `- **Мощность газопоршневого генератора**: ${generatorPower} МВт\n`;
-        markdown += `- **Стратегия обновления**: Замена ASIC-майнеров после каждого халвинга\n\n`;
+        markdown += `- **Мощность газопоршневого генератора**: ${generatorPower} МВт\n\n`;
 
         markdown += `## 2. Капитальные затраты (CAPEX)\n\n`;
-        markdown += `### 2.1 Первоначальные капитальные затраты\n\n`;
         markdown += `| Компонент | Мощность/Количество | Стоимость (руб.) |\n`;
         markdown += `|-----------|---------------------|------------------|\n`;
         markdown += `| Газопоршневой генератор | ${generatorPower} МВт | ${formatNumber(generatorCost)} |\n`;
-        markdown += `| Майнинг-ферма | ${minerCount} ASIC-майнеров | ${formatNumber(initialMiningFarmCost)} |\n`;
+        markdown += `| Майнинг-ферма | ${minerCount} ASIC-майнеров | ${formatNumber(miningFarmCost)} |\n`;
         markdown += `| Система утилизации тепла | - | ${formatNumber(heatUtilizationCost)} |\n`;
         markdown += `| Абсорбционный холодильник | ${chillerPower} МВт | ${formatNumber(chillerCost)} |\n`;
         markdown += `| Градирни | ${coolingTowersPower} МВт | ${formatNumber(coolingTowersCost)} |\n`;
         markdown += `| АСУ (автоматизированная система управления) | - | ${formatNumber(controlSystemCost)} |\n`;
-        markdown += `| **ИТОГО первоначальные CAPEX** | | **${formatNumber(initialCapex)}** |\n\n`;
-
-        // Затраты на обновление ASIC
-        markdown += `### 2.2 Затраты на обновление ASIC\n\n`;
-        markdown += `| Год | Поколение ASIC | Хешрейт (TH/s) | Стоимость одного (руб.) | Общие затраты (руб.) |\n`;
-        markdown += `|-----|----------------|----------------|-------------------------|---------------------|\n`;
-
-        // Первая строка - первоначальные ASIC
-        markdown += `| 1-2 | ${asicGenerations[0].model} (Gen 1) | ${asicGenerations[0].hashRate.toFixed(1)} | ${formatNumber(asicGenerations[0].cost)} | ${formatNumber(initialMiningFarmCost)} |\n`;
-        // Затраты на обновление ASIC в году 3
-        if (asicGenerations.length > 1) {
-            markdown += `| 3-6 | ${asicGenerations[1].model} | ${asicGenerations[1].hashRate.toFixed(1)} | ${formatNumber(asicGenerations[1].cost)} | ${formatNumber(asicUpgradeCosts[2])} |\n`;
-        }
-        // Затраты на обновление ASIC в году 7
-        if (asicGenerations.length > 2) {
-            markdown += `| 7-9 | ${asicGenerations[2].model} | ${asicGenerations[2].hashRate.toFixed(1)} | ${formatNumber(asicGenerations[2].cost)} | ${formatNumber(asicUpgradeCosts[6])} |\n`;
-        }
-
-        markdown += `| **ИТОГО затраты на обновление ASIC** | | | | **${formatNumber(asicUpgradeCosts.reduce((a, b) => a + b, 0))}** |\n\n`;
-
-        markdown += `### 2.3 Общие капитальные затраты\n\n`;
-        markdown += `- **Первоначальные CAPEX**: ${formatNumber(initialCapex)} руб.\n`;
-        markdown += `- **Затраты на обновление ASIC**: ${formatNumber(asicUpgradeCosts.reduce((a, b) => a + b, 0))} руб.\n`;
-        markdown += `- **ИТОГО CAPEX за 9 лет**: ${formatNumber(totalCapex)} руб.\n\n`;
+        markdown += `| **ИТОГО CAPEX** | | **${formatNumber(totalCapex)}** |\n\n`;
 
         markdown += `## 3. Технические характеристики\n\n`;
         markdown += `### 3.1 Параметры майнинга\n\n`;
-        markdown += `- **Первоначальная модель майнера**: ${minerModel}\n`;
+        markdown += `- **Модель майнера**: ${minerModel}\n`;
         markdown += `- **Хешрейт одного майнера**: ${hashRate} TH/s\n`;
-        markdown += `- **Общий хешрейт фермы**: ${formatNumber(hashRate * minerCount)} TH/s\n`;
+        markdown += `- **Общий хешрейт фермы**: ${formatNumber(totalHashRateTH)} TH/s\n`;
         markdown += `- **Энергопотребление одного майнера**: ${minerPower} Вт\n`;
         markdown += `- **Общее энергопотребление фермы**: ${formatNumber(totalMinerPowerKW)} кВт\n\n`;
 
-        markdown += `### 3.2 Улучшение ASIC после халвинга\n\n`;
-        markdown += `- **Рост производительности новой генерации**: ${asicPerformanceIncrease}%\n`;
-        markdown += `- **Рост стоимости новой генерации**: ${asicCostIncrease}%\n\n`;
-
-        markdown += `### 3.3 Параметры генератора и утилизации тепла\n\n`;
+        markdown += `### 3.2 Параметры генератора и утилизации тепла\n\n`;
         markdown += `- **Мощность генератора**: ${generatorPower} МВт\n`;
         markdown += `- **КПД по электричеству**: ${genEfficiencyElec}%\n`;
         markdown += `- **КПД по теплу**: ${genEfficiencyHeat}%\n`;
@@ -523,9 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
         markdown += `| Цена газа (руб./м³) | ${yearlyResults.map(r => r.gasPrice.toFixed(2)).join(' | ')} |\n`;
         markdown += `| Цена тепла (руб./Гкал) | ${yearlyResults.map(r => formatNumber(r.heatPrice)).join(' | ')} |\n`;
         markdown += `| Коэффициент использования (%) | ${yearlyResults.map(r => r.utilizationRate.toFixed(1)).join(' | ')} |\n`;
-        markdown += `| Себестоимость электроэнергии (руб./кВт·ч) | ${yearlyResults.map(r => r.electricityCostPerKWh.toFixed(2)).join(' | ')} |\n`;
-        markdown += `| Поколение ASIC | ${yearlyResults.map(r => r.asicGeneration).join(' | ')} |\n`;
-        markdown += `| Хешрейт одного ASIC (TH/s) | ${yearlyResults.map(r => r.asicHashRate.toFixed(1)).join(' | ')} |\n\n`;
+        markdown += `| Себестоимость электроэнергии (руб./кВт·ч) | ${yearlyResults.map(r => r.electricityCostPerKWh.toFixed(2)).join(' | ')} |\n\n`;
 
         // 4.2 Производство и потребление - таблица
         markdown += `### 4.2 Производство и потребление\n\n`;
@@ -549,8 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
         markdown += `| Затраты на обслуживание | ${yearlyResults.map(r => formatNumber(Math.round(r.maintenanceCost / 1000))).join(' | ')} |\n`;
         markdown += `| Операционные расходы (всего) | ${yearlyResults.map(r => formatNumber(Math.round(r.operatingExpenses / 1000))).join(' | ')} |\n`;
         markdown += `| EBITDA | ${yearlyResults.map(r => formatNumber(Math.round(r.ebitda / 1000))).join(' | ')} |\n`;
-        markdown += `| Амортизация инфраструктуры | ${yearlyResults.map(r => formatNumber(Math.round(r.yearlyDepreciation / 1000))).join(' | ')} |\n`;
-        markdown += `| Затраты на обновление ASIC | ${yearlyResults.map(r => formatNumber(Math.round(r.asicUpgradeCost / 1000))).join(' | ')} |\n`;
+        markdown += `| Амортизация | ${yearlyResults.map(r => formatNumber(Math.round(r.yearlyDepreciation / 1000))).join(' | ')} |\n`;
         markdown += `| Прибыль до налогообложения | ${yearlyResults.map(r => formatNumber(Math.round(r.ebt / 1000))).join(' | ')} |\n`;
         markdown += `| Налог на майнинг (25%) | ${yearlyResults.map(r => formatNumber(Math.round(r.miningTax / 1000))).join(' | ')} |\n`;
         markdown += `| Чистая прибыль | ${yearlyResults.map(r => formatNumber(Math.round(r.netProfit / 1000))).join(' | ')} |\n\n`;
@@ -564,10 +415,9 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 0; i < yearlyResults.length; i++) {
             const r = yearlyResults[i];
             const totalRevenue = r.miningRevenue + r.heatRevenue;
-            const totalExpenses = r.operatingExpenses + r.asicUpgradeCost;
             cumulativeProfit += r.netProfit;
 
-            markdown += `| ${r.year} | ${formatNumber(Math.round(totalRevenue / 1000))} | ${formatNumber(Math.round(totalExpenses / 1000))} | ${formatNumber(Math.round(r.ebitda / 1000))} | ${formatNumber(Math.round(r.netProfit / 1000))} | ${formatNumber(Math.round(cumulativeProfit / 1000))} |\n`;
+            markdown += `| ${r.year} | ${formatNumber(Math.round(totalRevenue / 1000))} | ${formatNumber(Math.round(r.operatingExpenses / 1000))} | ${formatNumber(Math.round(r.ebitda / 1000))} | ${formatNumber(Math.round(r.netProfit / 1000))} | ${formatNumber(Math.round(cumulativeProfit / 1000))} |\n`;
         }
 
         markdown += '\n';
@@ -576,23 +426,16 @@ document.addEventListener('DOMContentLoaded', function() {
         cumulativeProfit = 0;
         let paybackYear = 0;
         let paybackMonth = 0;
-        let paybackCosts = initialCapex; // Начальные затраты
 
         for (let i = 0; i < yearlyResults.length; i++) {
-            // Добавляем затраты на обновление ASIC к сумме, которую нужно окупить
-            if (yearlyResults[i].asicUpgradeCost > 0) {
-                paybackCosts += yearlyResults[i].asicUpgradeCost;
-            }
-
-            // Прибыль накапливается
             cumulativeProfit += yearlyResults[i].netProfit;
 
-            if (cumulativeProfit >= paybackCosts && paybackYear === 0) {
+            if (cumulativeProfit >= totalCapex && paybackYear === 0) {
                 paybackYear = i + 1;
 
                 // Расчет месяцев
                 const previousYearCumulative = cumulativeProfit - yearlyResults[i].netProfit;
-                const remainingToPayback = paybackCosts - previousYearCumulative;
+                const remainingToPayback = totalCapex - previousYearCumulative;
                 const monthlyProfit = yearlyResults[i].netProfit / 12;
                 paybackMonth = Math.ceil(remainingToPayback / monthlyProfit);
 
@@ -605,17 +448,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Расчет IRR (простое приближение)
         const totalProfit = yearlyResults.reduce((sum, year) => sum + year.netProfit, 0);
-        const avgYearlyProfit = totalProfit / 9;
+        const avgYearlyProfit = totalProfit / 7;
         const simpleROI = (avgYearlyProfit / totalCapex) * 100;
 
         markdown += `## 5. Показатели эффективности проекта\n\n`;
-        markdown += `- **Общие капитальные затраты за 9 лет**: ${formatNumber(totalCapex)} руб.\n`;
-        markdown += `- **Суммарная чистая прибыль за 9 лет**: ${formatNumber(Math.round(totalProfit))} руб.\n`;
+        markdown += `- **Общие капитальные затраты**: ${formatNumber(totalCapex)} руб.\n`;
+        markdown += `- **Суммарная чистая прибыль за 7 лет**: ${formatNumber(Math.round(totalProfit))} руб.\n`;
 
         if (paybackYear > 0) {
-            markdown += `- **Срок окупаемости (с учетом обновления ASIC)**: ${paybackYear} лет ${paybackMonth} месяцев\n`;
+            markdown += `- **Срок окупаемости**: ${paybackYear} лет ${paybackMonth} месяцев\n`;
         } else {
-            markdown += `- **Срок окупаемости**: более 9 лет\n`;
+            markdown += `- **Срок окупаемости**: более 7 лет\n`;
         }
 
         markdown += `- **Средняя годовая рентабельность инвестиций**: ${simpleROI.toFixed(2)}%\n\n`;
@@ -626,26 +469,24 @@ document.addEventListener('DOMContentLoaded', function() {
         markdown += `2. **Рост сложности майнинга** - более быстрый рост сложности, чем прогнозируется, приведет к снижению добычи Bitcoin.\n`;
         markdown += `3. **Изменение регуляторной среды** - ужесточение законодательства в отношении майнинга или повышение налоговой нагрузки.\n`;
         markdown += `4. **Рост цен на газ** - повышение стоимости газа выше прогнозных значений увеличит операционные расходы.\n`;
-        markdown += `5. **Технологические риски** - выход из строя оборудования, снижение эффективности утилизации тепла.\n`;
-        markdown += `6. **Риски при обновлении ASIC** - задержки поставок нового оборудования, его недоступность или значительно более высокая стоимость.\n\n`;
+        markdown += `5. **Технологические риски** - выход из строя оборудования, снижение эффективности утилизации тепла.\n\n`;
 
         markdown += `### Меры по снижению рисков:\n\n`;
         markdown += `1. Хеджирование риска волатильности цены Bitcoin через финансовые инструменты.\n`;
         markdown += `2. Регулярное обновление майнингового оборудования для поддержания конкурентоспособности.\n`;
         markdown += `3. Заключение долгосрочных контрактов на поставку газа по фиксированной цене.\n`;
         markdown += `4. Диверсификация бизнеса за счет максимизации дохода от реализации тепла.\n`;
-        markdown += `5. Комплексная система мониторинга и профилактического обслуживания оборудования.\n`;
-        markdown += `6. Создание резервного фонда для своевременного обновления ASIC-майнеров и предварительное планирование заказов.\n\n`;
+        markdown += `5. Комплексная система мониторинга и профилактического обслуживания оборудования.\n\n`;
 
         // Формируем заключение
         markdown += `## 7. Заключение\n\n`;
 
         if (paybackYear <= 4) {
-            markdown += `Проект Bitcoin Heating демонстрирует высокую эффективность с периодом окупаемости ${paybackYear} лет ${paybackMonth} месяцев и средней годовой рентабельностью ${simpleROI.toFixed(2)}%. Стратегия обновления ASIC-майнеров после каждого халвинга позволяет поддерживать конкурентоспособность майнинговой фермы, несмотря на рост сложности сети и уменьшение вознаграждения за блок. Комбинирование майнинга криптовалюты с утилизацией тепла создает синергетический эффект и снижает зависимость от волатильности рынка криптовалют. Проект рекомендуется к реализации.`;
-        } else if (paybackYear <= 7) {
-            markdown += `Проект Bitcoin Heating имеет умеренную эффективность с периодом окупаемости ${paybackYear} лет ${paybackMonth} месяцев и средней годовой рентабельностью ${simpleROI.toFixed(2)}%. Стратегия обновления ASIC-майнеров после каждого халвинга увеличивает капитальные затраты, но позволяет поддерживать стабильный уровень дохода от майнинга. Несмотря на длительный срок окупаемости, проект обеспечивает стабильный денежный поток и имеет потенциал для улучшения показателей при благоприятном изменении рыночных условий. Проект может быть рекомендован к реализации при наличии долгосрочной инвестиционной стратегии.`;
+            markdown += `Проект Bitcoin Heating демонстрирует высокую эффективность с периодом окупаемости ${paybackYear} лет ${paybackMonth} месяцев и средней годовой рентабельностью ${simpleROI.toFixed(2)}%. Комбинирование майнинга криптовалюты с утилизацией тепла позволяет достичь синергетического эффекта и снизить зависимость от волатильности рынка криптовалют. Проект рекомендуется к реализации.`;
+        } else if (paybackYear <= 6) {
+            markdown += `Проект Bitcoin Heating имеет умеренную эффективность с периодом окупаемости ${paybackYear} лет ${paybackMonth} месяцев и средней годовой рентабельностью ${simpleROI.toFixed(2)}%. Несмотря на длительный срок окупаемости, проект обеспечивает стабильный денежный поток и имеет потенциал для улучшения показателей при благоприятном изменении рыночных условий. Проект может быть рекомендован к реализации при наличии долгосрочной инвестиционной стратегии.`;
         } else {
-            markdown += `Проект Bitcoin Heating демонстрирует длительный срок окупаемости (более ${paybackYear} лет) и среднюю годовую рентабельность ${simpleROI.toFixed(2)}%. Значительные затраты на обновление ASIC-майнеров после каждого халвинга оказывают существенное влияние на экономику проекта. Рекомендуется пересмотреть ключевые параметры проекта для улучшения экономических показателей: рассмотреть возможность частичного обновления оборудования, поиска более эффективных ASIC-майнеров или увеличения доходов от реализации тепла. Также стоит рассмотреть альтернативные варианты инвестирования с более высокой доходностью и меньшим сроком окупаемости.`;
+            markdown += `Проект Bitcoin Heating демонстрирует длительный срок окупаемости (более 7 лет) и среднюю годовую рентабельность ${simpleROI.toFixed(2)}%. Рекомендуется пересмотреть ключевые параметры проекта для улучшения экономических показателей, либо рассмотреть альтернативные варианты инвестирования с более высокой доходностью и меньшим сроком окупаемости.`;
         }
 
         // Сохраняем сгенерированный отчет
